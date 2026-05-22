@@ -108,6 +108,17 @@
       </bt:LongStrings>
     </Resources>
 
+    <WebApplicationInfo>
+      <Id>YOUR_AZURE_APP_CLIENT_ID</Id>
+      <Resource>api://youvaibrahim.github.io/bella-addin/YOUR_AZURE_APP_CLIENT_ID</Resource>
+      <Scopes>
+        <Scope>openid</Scope>
+        <Scope>profile</Scope>
+        <Scope>User.Read</Scope>
+        <Scope>GroupMember.Read.All</Scope>
+      </Scopes>
+    </WebApplicationInfo>
+
   </VersionOverrides>
 
 </OfficeApp>
