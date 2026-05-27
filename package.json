@@ -1,0 +1,31 @@
+{
+  "name": "bella-addin",
+  "version": "1.0.0",
+  "description": "Bella Outlook Add-in — calls n8n MCP agent with Entra ID JWT auth",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:mock": "vite --mode mock",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^3.20.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@types/office-js": "^1.0.395",
+    "@vitest/coverage-v8": "^1.6.0",
+    "jsdom": "^24.1.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vitest": "^1.6.0"
+  }
+}

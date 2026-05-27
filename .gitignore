@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+
+# Environment variables — never commit
+.env
+.env.local
+.env.*.local
+
+# Vite cache
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+*.sw?

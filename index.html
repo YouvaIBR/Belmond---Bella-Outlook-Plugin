@@ -3,121 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <title>Bella — Belmond Assistant</title>
-
-    <!-- Dev mock: define Office + msal BEFORE office.js loads so the CDN stub can't replace them -->
-    <script>
-      window.Office = {
-        onReady: (cb) => setTimeout(() => cb({ host: "Outlook" }), 0),
-        context: {
-          mailbox: {
-            item: {
-              subject: "Room Availability Inquiry & Boat Rental – July 2026",
-              from: { emailAddress: "sarah.thompson@gmail.com" },
-              body: {
-                getAsync: (_, cb) =>
-                  cb({
-                    status: "succeeded",
-                    value:
-                      "Dear La Residencia Team,I hope this message finds you well. I am writing to inquire about availability at your property for an upcoming trip to Mallorca.We are a group of 2 adults looking to stay at La Residencia from July 14 to July 21, 2026 (7 nights). Could you please let us know if you have any rooms or suites available during that period, along with the current rates?Additionally, I would love to know whether it is possible to arrange a private boat rental through the hotel, either for a half-day or full-day excursion along the coast. If so, could you provide details on the options available, pricing, and whether a captain/crew is included?We would very much appreciate any information you can share, and we look forward to hearing from you.Warm regards,Sarah Thompson +1 (917) 555-0284 sarah.thompson@gmail.com",
-                  }),
-                setAsync: (_, __, cb) => cb && cb({ status: "succeeded" }),
-              },
-            },
-          },
-        },
-        HostType: { Outlook: "Outlook" },
-        AsyncResultStatus: { Failed: "failed" },
-        CoercionType: { Text: "text" },
-      };
-      window.msal = {
-        createNestablePublicClientApplication: async () => ({
-          getAllAccounts: () => [],
-          acquireTokenSilent: async () => ({ accessToken: "mock" }),
-        }),
-      };
-    </script>
-
-    <link rel="stylesheet" href="styles.css" />
+    <title>Bella — Belmond AI Reply</title>
+    <script
+      type="text/javascript"
+      src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"
+    ></script>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
+
   <body>
-    <header class="header">
-      <div class="header-inner">
-        <h1>Bella</h1>
-        <p>Belmond Assistant</p>
+    <!-- Auth loading -->
+    <section id="auth-loading" class="panel" aria-live="polite">
+      <p class="status-text">Signing in…</p>
+    </section>
+
+    <!-- Access denied -->
+    <section id="access-denied" class="panel" hidden>
+      <h1 class="panel-title">Access denied</h1>
+      <p class="panel-body">You don't have permission to use Bella. Contact your administrator.</p>
+    </section>
+
+    <!-- Main panel -->
+    <section id="main-panel" class="panel" hidden>
+      <header class="addin-header">
+        <h1 class="addin-title">Bella</h1>
+        <p class="addin-subtitle">Generate a reply with Belmond AI</p>
+      </header>
+
+      <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+
+      <button id="generate-btn" type="button" class="btn btn-primary">Generate reply</button>
+    </section>
+
+    <!-- Loading -->
+    <section id="loading" class="panel" hidden aria-live="polite">
+      <p class="status-text">Bella is thinking…</p>
+    </section>
+
+    <!-- Result -->
+    <section id="result" class="panel" hidden>
+      <div class="result-section">
+        <h2 class="result-label">Draft reply</h2>
+        <div
+          id="draft-preview"
+          class="result-content draft-preview"
+          contenteditable="true"
+          aria-label="Draft reply (editable)"
+        ></div>
       </div>
-    </header>
 
-    <main class="content">
-      <!-- Auth loading state (shown while checking Azure AD group membership) -->
-      <div
-        id="auth-loading"
-        class="loading"
-        role="status"
-        aria-live="polite"
-        style="display: none"
-      >
-        <div class="spinner" aria-hidden="true"></div>
-        <span>Checking access…</span>
+      <div class="result-section">
+        <h2 class="result-label">Enquiries</h2>
+        <div id="enquiries" class="result-content"></div>
       </div>
 
-      <!-- Access denied state -->
-      <div id="access-denied" class="error" role="alert" style="display: none">
-        <strong>Access denied</strong>
-        <span class="access-denied-message"></span>
+      <div class="result-section">
+        <h2 class="result-label">Unanswered</h2>
+        <div id="unanswered" class="result-content"></div>
       </div>
 
-      <!-- Main panel — hidden until access control passes -->
-      <div id="main-panel" style="display: none">
-        <button id="btn-generate" class="btn-primary">
-          ✦ Generate a reply
-        </button>
-
-        <!-- Loading -->
-        <div id="loading" class="loading" role="status" aria-live="polite">
-          <div class="spinner" aria-hidden="true"></div>
-          <span>Bella is thinking…</span>
-        </div>
-
-        <!-- Error -->
-        <div id="error" class="error" role="alert" aria-live="assertive">
-          <strong>An error occurred</strong>
-          <span id="error-message"></span>
-        </div>
-
-        <!-- Result -->
-        <div id="result" class="result">
-          <!-- Email draft preview -->
-          <p class="result-label">Draft</p>
-          <div
-            id="draft-preview"
-            class="draft-preview"
-            contenteditable="true"
-            aria-label="Reply draft generated by Bella"
-          ></div>
-
-          <!-- Hidden textarea used only for insertion into Outlook -->
-          <textarea
-            id="draft-text"
-            aria-hidden="true"
-            style="display: none"
-          ></textarea>
-
-          <div class="divider"></div>
-
-          <button id="btn-insert" class="btn-primary">
-            ↳ Insert into reply
-          </button>
-
-          <button id="btn-regenerate" class="btn-secondary">
-            ↺ Regenerate
-          </button>
-        </div>
+      <div class="action-row">
+        <button id="back-btn" type="button" class="btn btn-secondary">Back</button>
+        <button id="insert-btn" type="button" class="btn btn-primary">Insert reply</button>
       </div>
-    </main>
+    </section>
 
-    <footer class="footer">Powered by Bella · Belmond</footer>
-    <script src="app.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
