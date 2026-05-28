@@ -27,7 +27,28 @@ async function bellaReply(event: Office.AddinCommands.Event): Promise<void> {
 
     item.notificationMessages.removeAsync(NOTIFICATION_ID);
 
-    item.displayReplyFormAsync({ htmlBody: response.draft });
+    localStorage.setItem("bella_draft", response.draft);
+
+    Office.context.ui.displayDialogAsync(
+      `${window.location.origin}/Belmond---Bella-Outlook-Plugin/reply-dialog.html`,
+      { height: 60, width: 40, promptBeforeOpen: false },
+      (result) => {
+        if (result.status === Office.AsyncResultStatus.Failed) {
+          void notify(item, "errorMessage", "Could not open the draft dialog. Please retry.", true);
+          event.completed();
+          return;
+        }
+        const dialog = result.value;
+        dialog.addEventHandler(Office.EventType.DialogMessageReceived, () => {
+          dialog.close();
+          event.completed();
+        });
+        dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
+          // User closed the dialog manually
+          event.completed();
+        });
+      },
+    );
   } catch (err) {
     const message =
       err instanceof AgentError
@@ -37,7 +58,6 @@ async function bellaReply(event: Office.AddinCommands.Event): Promise<void> {
           : "Bella encountered an error. Please retry.";
 
     await notify(item, "errorMessage", message, true);
-  } finally {
     event.completed();
   }
 }

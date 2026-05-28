@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         taskpane: "index.html",
         commands: "commands.html",
+        replyDialog: "reply-dialog.html",
       },
     },
   },
