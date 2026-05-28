@@ -57,12 +57,14 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
-          <FunctionFile resid="FunctionFile.Url" />
+          <FunctionFile resid="CommandsFile.Url" />
 
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel" />
+
+                <!-- Panel mode: opens the task pane (auto-triggers the API call) -->
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
                   <Label resid="TaskpaneButton.Label" />
                   <Supertip>
@@ -78,6 +80,24 @@
                     <SourceLocation resid="Taskpane.Url" />
                   </Action>
                 </Control>
+
+                <!-- Inject mode: no task pane, calls API silently then opens reply -->
+                <Control xsi:type="Button" id="msgReadInjectButton">
+                  <Label resid="InjectButton.Label" />
+                  <Supertip>
+                    <Title resid="InjectButton.Label" />
+                    <Description resid="InjectButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>bellaReply</FunctionName>
+                  </Action>
+                </Control>
+
               </Group>
             </OfficeTab>
           </ExtensionPoint>
@@ -93,15 +113,17 @@
         <bt:Image id="Icon.80x80" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="FunctionFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
+        <bt:Url id="CommandsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/commands.html" />
         <bt:Url id="Taskpane.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Bella" />
         <bt:String id="TaskpaneButton.Label" DefaultValue="Reply with Bella" />
+        <bt:String id="InjectButton.Label" DefaultValue="Reply with Bella (Quick)" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Bella panel to generate a reply to this email" />
+        <bt:String id="InjectButton.Tooltip" DefaultValue="Generate a reply with Bella and open it as a draft reply" />
       </bt:LongStrings>
     </Resources>
 
@@ -116,12 +138,14 @@
       <Hosts>
         <Host xsi:type="MailHost">
           <DesktopFormFactor>
-            <FunctionFile resid="FunctionFile.Url" />
+            <FunctionFile resid="CommandsFile.Url" />
 
             <ExtensionPoint xsi:type="MessageReadCommandSurface">
               <OfficeTab id="TabDefault">
                 <Group id="msgReadGroup">
                   <Label resid="GroupLabel" />
+
+                  <!-- Panel mode: opens the task pane (auto-triggers the API call) -->
                   <Control xsi:type="Button" id="msgReadOpenPaneButton">
                     <Label resid="TaskpaneButton.Label" />
                     <Supertip>
@@ -137,6 +161,24 @@
                       <SourceLocation resid="Taskpane.Url" />
                     </Action>
                   </Control>
+
+                  <!-- Inject mode: no task pane, calls API silently then opens reply -->
+                  <Control xsi:type="Button" id="msgReadInjectButton">
+                    <Label resid="InjectButton.Label" />
+                    <Supertip>
+                      <Title resid="InjectButton.Label" />
+                      <Description resid="InjectButton.Tooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16x16" />
+                      <bt:Image size="32" resid="Icon.32x32" />
+                      <bt:Image size="80" resid="Icon.80x80" />
+                    </Icon>
+                    <Action xsi:type="ExecuteFunction">
+                      <FunctionName>bellaReply</FunctionName>
+                    </Action>
+                  </Control>
+
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
@@ -152,15 +194,17 @@
           <bt:Image id="Icon.80x80" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-80.png" />
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="FunctionFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
+          <bt:Url id="CommandsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/commands.html" />
           <bt:Url id="Taskpane.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Bella" />
           <bt:String id="TaskpaneButton.Label" DefaultValue="Reply with Bella" />
+          <bt:String id="InjectButton.Label" DefaultValue="Reply with Bella (Quick)" />
         </bt:ShortStrings>
         <bt:LongStrings>
           <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Bella panel to generate a reply to this email" />
+          <bt:String id="InjectButton.Tooltip" DefaultValue="Generate a reply with Bella and open it as a draft reply" />
         </bt:LongStrings>
       </Resources>
 

@@ -55,3 +55,18 @@ export function insertDraftReply(html: string): Promise<void> {
     }
   });
 }
+
+// Opens a pre-filled reply draft directly in Outlook (inject mode).
+// Uses displayReplyFormAsync when available, falls back to the legacy sync form.
+export function openReplyForm(html: string): void {
+  if (typeof Office === "undefined" || !Office.context?.mailbox) return;
+
+  const item = Office.context.mailbox.item;
+  if (!item) return;
+
+  if (typeof item.displayReplyFormAsync === "function") {
+    item.displayReplyFormAsync({ htmlBody: html });
+  } else {
+    item.displayReplyForm({ htmlBody: html });
+  }
+}

@@ -15,8 +15,11 @@ if (IS_MOCK) {
 }
 
 async function initializeAddin(): Promise<void> {
-  showPanel("main-panel");
   attachEventListeners();
+  // Auto-trigger: generate immediately when the panel opens.
+  // The generate button is hidden by default and shown only on error for retry.
+  showPanel("loading");
+  await handleGenerate();
 }
 
 function attachEventListeners(): void {
@@ -28,6 +31,9 @@ function attachEventListeners(): void {
 async function handleGenerate(): Promise<void> {
   clearError();
   showPanel("loading");
+
+  const generateBtn = document.getElementById("generate-btn");
+  if (generateBtn) generateBtn.hidden = true;
 
   try {
     const mailItem = await getMailItem();
@@ -42,7 +48,7 @@ async function handleGenerate(): Promise<void> {
     renderResult(response);
     showPanel("result");
   } catch (err) {
-    showPanel("main-panel");
+    if (generateBtn) generateBtn.hidden = false;
 
     if (err instanceof AgentError) {
       if (err.statusCode === 401 || err.statusCode === 403) {
