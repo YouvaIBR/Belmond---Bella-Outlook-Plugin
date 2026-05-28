@@ -6,19 +6,19 @@
   xsi:type="MailApp">
 
   <Id>a3f7c2d1-4e89-4b6a-9f12-8c3d5e7a1b04</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.2</Version>
   <ProviderName>Belmond</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Bella - Belmond Assistant" />
   <Description DefaultValue="Generate a reply to this email using Bella, Belmond's AI assistant" />
 
-  <IconUrl DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-80.png" />
+  <IconUrl DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
 
   <SupportUrl DefaultValue="https://www.belmond.com" />
 
   <AppDomains>
-    <AppDomain>https://youvaibr.github.io</AppDomain>
+    <AppDomain>https://<FIREBASE_DOMAIN></AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -34,7 +34,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
+        <SourceLocation DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -108,13 +108,13 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-80.png" />
+        <bt:Image id="Icon.16x16" DefaultValue="https://<FIREBASE_DOMAIN>/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="CommandsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
+        <bt:Url id="CommandsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Bella" />
@@ -130,13 +130,16 @@
     <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
 
       <Requirements>
-        <bt:Sets DefaultMinVersion="1.3">
+        <bt:Sets DefaultMinVersion="1.10">
           <bt:Set Name="Mailbox" />
         </bt:Sets>
       </Requirements>
 
       <Hosts>
         <Host xsi:type="MailHost">
+          <Runtimes>
+            <Runtime resid="LaunchEventsFile.Url" lifetime="short" />
+          </Runtimes>
           <DesktopFormFactor>
             <FunctionFile resid="CommandsFile.Url" />
 
@@ -197,14 +200,14 @@
 
       <Resources>
         <bt:Images>
-          <bt:Image id="Icon.16x16" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-16.png" />
-          <bt:Image id="Icon.32x32" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-32.png" />
-          <bt:Image id="Icon.80x80" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/icon-80.png" />
+          <bt:Image id="Icon.16x16" DefaultValue="https://<FIREBASE_DOMAIN>/icon-16.png" />
+          <bt:Image id="Icon.32x32" DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
+          <bt:Image id="Icon.80x80" DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="CommandsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/commands.html" />
-          <bt:Url id="Taskpane.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
-          <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/launchEvents.html" />
+          <bt:Url id="CommandsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/commands.html" />
+          <bt:Url id="Taskpane.Url" DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
+          <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/launchEvents.html" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Bella" />
@@ -218,8 +221,8 @@
       </Resources>
 
       <WebApplicationInfo>
-        <Id>a8dd5b63-9bee-4d1a-a5f0-aa5187edf82f</Id>
-        <Resource>api://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/a8dd5b63-9bee-4d1a-a5f0-aa5187edf82f</Resource>
+        <Id>e8919706-c411-4da6-9da5-5f1b1c836cfe</Id>
+        <Resource>api://<FIREBASE_DOMAIN>/e8919706-c411-4da6-9da5-5f1b1c836cfe</Resource>
         <Scopes>
           <Scope>openid</Scope>
           <Scope>profile</Scope>
