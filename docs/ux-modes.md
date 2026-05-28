@@ -28,7 +28,7 @@ The generate button appears so the user can retry manually.
 
 ---
 
-## Mode 2 — Inject (function command + dialog)
+## Mode 2 — Inject (function command + event-based activation)
 
 **Ribbon button**: "Reply with Bella (Quick)"  
 **Manifest action**: `ExecuteFunction` → `bellaReply`
@@ -38,36 +38,28 @@ The generate button appears so the user can retry manually.
 ```
 User clicks "Reply with Bella (Quick)"
   → No task pane opens
-  → Notification "Bella is thinking…" appears in the email info bar
-  → API call to n8n webhook (background)
-  → Notification removed
-  → Dialog opens (60% height, 40% width) with the draft editable
-  → User edits the draft
-  → User clicks "Copy" → content copied to clipboard
-  → User clicks "Close" → dialog closes
+  → Outlook reply form opens immediately with "Bella is thinking…" placeholder
+  → API call to n8n webhook runs in background
+  → OnNewMessageCompose event fires → handler polls sessionData for the draft
+  → When draft is ready, body.setAsync() replaces the placeholder with real content
+  → User edits and sends normally
 ```
 
 ### On error
 
-A persistent error notification appears in the email info bar with a retry message.
+A persistent error notification appears in the email info bar.
 
 ---
 
 ## Why two modes?
 
-The inject mode (function command) cannot call `displayReplyFormAsync` or
-`displayNewMessageFormAsync` to open an Outlook reply window. This is a hard
-platform limitation: function commands run in an ephemeral, UI-less runtime
-that is destroyed as soon as `event.completed()` is called. Outlook does not
-support shared runtimes, so there is no bridge between the function command
-runtime and any compose window.
+The inject mode uses `displayReplyAllForm()` called synchronously within the user gesture tick (before any `await`), which opens the reply window. The function command runtime continues running until `event.completed()` is called — this is deferred until the API call finishes so the draft can be written to `Office.sessionData`.
+
+The `OnNewMessageCompose` event handler runs in the new compose window's context and reads `sessionData` to inject the draft via `body.setAsync()`. It polls up to 30 s (1 s intervals) in case the API call is still in flight when the compose window opens.
 
 References:
-- [GitHub OfficeDev/office-js #747](https://github.com/OfficeDev/office-js/issues/747) — `displayReplyFormAsync` silently fails in UI-less add-ins
-- [Runtimes in Office Add-ins](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/runtimes) — Outlook does not support shared runtimes
-
-`displayDialogAsync` is explicitly supported from function commands and is
-the recommended workaround for any user-facing UI from a UI-less command.
+- [Event-based activation](https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch) — OnNewMessageCompose
+- [sessionData API](https://learn.microsoft.com/en-us/javascript/api/outlook/office.sessiondata) — per-item cross-runtime storage
 
 ---
 
@@ -75,19 +67,22 @@ the recommended workaround for any user-facing UI from a UI-less command.
 
 ```
 bellaReply(event)
-  ├── notify() → "Bella is thinking…"
-  ├── acquireToken() + callAgent()
-  ├── localStorage.setItem("bella_draft", html)
-  ├── displayDialogAsync("reply-dialog.html")
-  │     ├── dialog loads → reads localStorage → renders draft
-  │     ├── user edits / copies
-  │     └── user clicks Close → messageParent("close")
-  │           └── dialog.close() → event.completed()
-  └── [on error] notify() → error message → event.completed()
+  ├── sessionData.clearAsync()
+  ├── displayReplyAllForm({ htmlBody: "Bella is thinking…" })   ← synchronous, user gesture
+  └── runAgentAndStore(event, item)   ← async, runs in background
+        ├── acquireToken() + callAgent()
+        ├── sessionData.setAsync("bella_draft", html)
+        └── event.completed()
+
+OnNewMessageCompose fires in compose window
+  └── injectDraft(event, item)
+        ├── sessionData.getAsync("bella_draft")
+        │     ├── found → body.setAsync(html) → done
+        │     └── not found → pollForDraft() (up to 30 s)
+        └── event.completed()
 ```
 
-`event.completed()` is deferred until the dialog closes. This keeps the
-function command runtime alive for the duration of the dialog session.
+`event.completed()` in `bellaReply` is deferred until after `sessionData.setAsync()` so the data is available before the event handler polls.
 
 ---
 
@@ -96,9 +91,9 @@ function command runtime alive for the duration of the dialog session.
 | File | Role |
 |---|---|
 | `src/main.ts` | Task pane entry — auto-trigger, result panel, insert |
-| `src/commands/commands.ts` | Function command — API call, notification, dialog |
-| `src/dialog/dialog.ts` | Dialog logic — render draft, copy, close |
+| `src/commands/commands.ts` | Function command — opens reply form, runs API, stores draft |
+| `src/commands/launchEvents.ts` | OnNewMessageCompose handler — reads sessionData, injects draft |
 | `index.html` | Task pane HTML |
 | `commands.html` | FunctionFile HTML (never displayed) |
-| `reply-dialog.html` | Dialog HTML — editable draft UI |
-| `manifest.xml` | Declares both buttons and FunctionFile |
+| `launchEvents.html` | Event handler HTML (never displayed) |
+| `manifest.xml` | Declares both buttons, FunctionFile, and LaunchEvent |

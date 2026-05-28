@@ -3,20 +3,36 @@ import { acquireToken } from "../auth/msal.js";
 import { getMailItem } from "../services/office.js";
 
 const NOTIFICATION_ID = "bella-status";
+const SESSION_KEY = "bella_draft";
+const SESSION_ERROR_KEY = "bella_draft_error";
 
-async function bellaReply(event: Office.AddinCommands.Event): Promise<void> {
+function bellaReply(event: Office.AddinCommands.Event): void {
   const item = Office.context.mailbox.item as Office.MessageRead | null;
   if (!item) {
     event.completed();
     return;
   }
 
-  await notify(item, "informationalMessage", "Bella is thinking…", false);
+  // Clear previous draft
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_ERROR_KEY);
 
+  // Open the reply form immediately (must be synchronous, within user gesture)
+  // The OnNewMessageCompose handler will replace this placeholder with the real draft
+  item.displayReplyAllForm({
+    htmlBody: `<p style="color:#888;font-style:italic;">Bella is thinking…</p>`,
+  });
+
+  // API call runs in background — event.completed() deferred until done
+  void runAgentAndStore(event, item);
+}
+
+async function runAgentAndStore(
+  event: Office.AddinCommands.Event,
+  item: Office.MessageRead,
+): Promise<void> {
   try {
-    // Ensure token is ready before the heavy API call
     await acquireToken();
-
     const mailItem = await getMailItem();
     const response = await callAgent({
       emailBody: mailItem.body,
@@ -25,30 +41,8 @@ async function bellaReply(event: Office.AddinCommands.Event): Promise<void> {
       productCode: "LRS",
     });
 
-    item.notificationMessages.removeAsync(NOTIFICATION_ID);
-
-    localStorage.setItem("bella_draft", response.draft);
-
-    Office.context.ui.displayDialogAsync(
-      `${window.location.origin}/Belmond---Bella-Outlook-Plugin/reply-dialog.html`,
-      { height: 60, width: 40, promptBeforeOpen: false },
-      (result) => {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          void notify(item, "errorMessage", "Could not open the draft dialog. Please retry.", true);
-          event.completed();
-          return;
-        }
-        const dialog = result.value;
-        dialog.addEventHandler(Office.EventType.DialogMessageReceived, () => {
-          dialog.close();
-          event.completed();
-        });
-        dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
-          // User closed the dialog manually
-          event.completed();
-        });
-      },
-    );
+    // Store draft so the OnNewMessageCompose handler can read it
+    localStorage.setItem(SESSION_KEY, response.draft);
   } catch (err) {
     const message =
       err instanceof AgentError
@@ -57,7 +51,9 @@ async function bellaReply(event: Office.AddinCommands.Event): Promise<void> {
           ? `${err.message} — Please retry.`
           : "Bella encountered an error. Please retry.";
 
+    localStorage.setItem(SESSION_ERROR_KEY, message);
     await notify(item, "errorMessage", message, true);
+  } finally {
     event.completed();
   }
 }

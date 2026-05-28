@@ -183,6 +183,14 @@
               </OfficeTab>
             </ExtensionPoint>
 
+            <!-- Event-based activation: inject draft when reply form opens -->
+            <ExtensionPoint xsi:type="LaunchEvent">
+              <LaunchEvents>
+                <LaunchEvent Type="OnNewMessageCompose" FunctionName="onNewMessageCompose" />
+              </LaunchEvents>
+              <SourceLocation resid="LaunchEventsFile.Url" />
+            </ExtensionPoint>
+
           </DesktopFormFactor>
         </Host>
       </Hosts>
@@ -196,6 +204,7 @@
         <bt:Urls>
           <bt:Url id="CommandsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/commands.html" />
           <bt:Url id="Taskpane.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/index.html" />
+          <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/launchEvents.html" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Bella" />
