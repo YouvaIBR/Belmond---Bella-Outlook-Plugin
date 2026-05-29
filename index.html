@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bella — Belmond AI Reply</title>
+    <script
+      type="text/javascript"
+      src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"
+    ></script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body>
+    <!-- Auth loading -->
+    <section id="auth-loading" class="panel" aria-live="polite">
+      <p class="status-text">Signing in…</p>
+    </section>
+
+    <!-- Access denied -->
+    <section id="access-denied" class="panel" hidden>
+      <h1 class="panel-title">Access denied</h1>
+      <p class="panel-body">You don't have permission to use Bella. Contact your administrator.</p>
+    </section>
+
+    <!-- Main panel -->
+    <section id="main-panel" class="panel" hidden>
+      <header class="addin-header">
+        <h1 class="addin-title">Bella</h1>
+        <p class="addin-subtitle">Generate a reply with Belmond AI</p>
+      </header>
+
+      <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+
+      <button id="generate-btn" type="button" class="btn btn-primary" hidden>Generate reply</button>
+    </section>
+
+    <!-- Loading -->
+    <section id="loading" class="panel" hidden aria-live="polite">
+      <p class="status-text">Bella is thinking…</p>
+    </section>
+
+    <!-- Result -->
+    <section id="result" class="panel" hidden>
+      <div class="result-section">
+        <h2 class="result-label">Draft reply</h2>
+        <div
+          id="draft-preview"
+          class="result-content draft-preview"
+          contenteditable="true"
+          aria-label="Draft reply (editable)"
+        ></div>
+      </div>
+
+      <div class="result-section">
+        <h2 class="result-label">Enquiries</h2>
+        <div id="enquiries" class="result-content"></div>
+      </div>
+
+      <div class="result-section">
+        <h2 class="result-label">Unanswered</h2>
+        <div id="unanswered" class="result-content"></div>
+      </div>
+
+      <div class="action-row">
+        <button id="back-btn" type="button" class="btn btn-secondary">Back</button>
+        <button id="insert-btn" type="button" class="btn btn-primary">Insert reply</button>
+      </div>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

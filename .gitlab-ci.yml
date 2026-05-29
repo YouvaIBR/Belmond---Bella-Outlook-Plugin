@@ -1,0 +1,65 @@
+image: node:20
+
+stages:
+  - install
+  - verify
+  - build
+  - deploy
+
+default:
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull
+
+install:
+  stage: install
+  script:
+    - npm ci
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull-push
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+lint:
+  stage: verify
+  needs: [install]
+  script:
+    - npm run lint
+
+test:
+  stage: verify
+  needs: [install]
+  script:
+    - npm test
+
+build:
+  stage: build
+  needs: [install, lint, test]
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+
+pages:
+  stage: deploy
+  needs: [build]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - mv dist public
+  artifacts:
+    paths:
+      - public
