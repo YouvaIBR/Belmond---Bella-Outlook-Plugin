@@ -65,29 +65,28 @@ deploy:firebase-hosting:prod:
     GITLAB_OIDC_TOKEN:
       aud: $GCP_WIF_PROVIDER_URL
   before_script:
-    - apt-get update && apt-get install -y curl jq
+    - apt-get update && apt-get install -y curl python3
+    - curl -sSL https://sdk.cloud.google.com | bash > /dev/null
+    - export PATH=$HOME/google-cloud-sdk/bin:$PATH
     - npm install -g firebase-tools
   script:
-    # Exchange GitLab OIDC token for a GCP federated token via STS
+    - echo "$GITLAB_OIDC_TOKEN" > /tmp/oidc_token
     - |
-      FEDERATED_TOKEN="$(curl --fail -s "https://sts.googleapis.com/v1/token" \
-        --header "Content-Type: application/json" \
-        --data "{
-          \"audience\": \"//iam.googleapis.com/$GCP_WIF_PROVIDER_PATH\",
-          \"grantType\": \"urn:ietf:params:oauth:grant-type:token-exchange\",
-          \"requestedTokenType\": \"urn:ietf:params:oauth:token-type:access_token\",
-          \"scope\": \"https://www.googleapis.com/auth/cloud-platform\",
-          \"subjectTokenType\": \"urn:ietf:params:oauth:token-type:jwt\",
-          \"subjectToken\": \"${GITLAB_OIDC_TOKEN}\"
-        }" | jq -r '.access_token')"
-    # Impersonate the service account to get a short-lived access token
-    - |
-      ACCESS_TOKEN="$(curl --fail -s "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/$GCP_SERVICE_ACCOUNT:generateAccessToken" \
-        --header "Authorization: Bearer ${FEDERATED_TOKEN}" \
-        --header "Content-Type: application/json" \
-        --data '{"scope": ["https://www.googleapis.com/auth/cloud-platform"]}' \
-        | jq -r '.accessToken')"
-    # Deploy — firebase-tools picks up the token via CLOUDSDK_AUTH_ACCESS_TOKEN
-    - CLOUDSDK_AUTH_ACCESS_TOKEN="$ACCESS_TOKEN" firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
+      cat > /tmp/cred.json <<EOF
+      {
+        "type": "external_account",
+        "audience": "//iam.googleapis.com/${GCP_WIF_PROVIDER_PATH}",
+        "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+        "token_url": "https://sts.googleapis.com/v1/token",
+        "credential_source": {
+          "file": "/tmp/oidc_token",
+          "format": {"type": "text"}
+        },
+        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${GCP_SERVICE_ACCOUNT}:generateAccessToken"
+      }
+      EOF
+    - gcloud auth login --cred-file=/tmp/cred.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
+    - firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
