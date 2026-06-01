@@ -87,6 +87,6 @@ deploy:firebase-hosting:prod:
       EOF
     - gcloud auth login --cred-file=/tmp/cred.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
-    - firebase deploy --only hosting --project bel-prd-bapi-prj --non-interactive
+    - firebase deploy --only hosting --project bel-prd-vision-prj --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
