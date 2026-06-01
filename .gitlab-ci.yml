@@ -46,6 +46,10 @@ test:
 build:
   stage: build
   needs: [install, lint, test]
+  variables:
+    VITE_CLIENT_ID: $VITE_CLIENT_ID
+    VITE_TENANT_ID: $VITE_TENANT_ID
+    VITE_N8N_WEBHOOK_URL: $VITE_N8N_WEBHOOK_URL
   script:
     - npm run build
   artifacts:
@@ -53,13 +57,36 @@ build:
       - dist/
     expire_in: 1 day
 
-pages:
+deploy:firebase-hosting:prod:
   stage: deploy
+  image: node:20
   needs: [build]
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: $GCP_WIF_PROVIDER_URL
+  before_script:
+    - apt-get update && apt-get install -y curl python3
+    - curl -sSL https://sdk.cloud.google.com | bash > /dev/null
+    - export PATH=$HOME/google-cloud-sdk/bin:$PATH
+    - npm install -g firebase-tools
+  script:
+    - echo "$GITLAB_OIDC_TOKEN" > /tmp/oidc_token
+    - |
+      cat > /tmp/cred.json <<EOF
+      {
+        "type": "external_account",
+        "audience": "//$GCP_WIF_PROVIDER_PATH",
+        "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+        "token_url": "https://sts.googleapis.com/v1/token",
+        "credential_source": {
+          "file": "/tmp/oidc_token",
+          "format": {"type": "text"}
+        },
+        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/$GCP_SERVICE_ACCOUNT:generateAccessToken"
+      }
+      EOF
+    - gcloud auth login --cred-file=/tmp/cred.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
+    - firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script:
-    - mv dist public
-  artifacts:
-    paths:
-      - public
