@@ -63,7 +63,7 @@ deploy:firebase-hosting:prod:
   needs: [build]
   id_tokens:
     GITLAB_OIDC_TOKEN:
-      aud: $GCP_WIF_PROVIDER_URL
+      aud: https://iam.googleapis.com/projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab
   before_script:
     - apt-get update && apt-get install -y curl python3
     - curl -sSL https://sdk.cloud.google.com | bash > /dev/null
@@ -75,18 +75,18 @@ deploy:firebase-hosting:prod:
       cat > /tmp/cred.json <<EOF
       {
         "type": "external_account",
-        "audience": "//iam.googleapis.com/${GCP_WIF_PROVIDER_PATH}",
+        "audience": "//iam.googleapis.com/projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab",
         "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
         "token_url": "https://sts.googleapis.com/v1/token",
         "credential_source": {
           "file": "/tmp/oidc_token",
           "format": {"type": "text"}
         },
-        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${GCP_SERVICE_ACCOUNT}:generateAccessToken"
+        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/bel-prd-bapi-sac-fb-hosting@bel-prd-bapi-prj.iam.gserviceaccount.com:generateAccessToken"
       }
       EOF
     - gcloud auth login --cred-file=/tmp/cred.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
-    - firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
+    - firebase deploy --only hosting --project bel-prd-bapi-prj --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
