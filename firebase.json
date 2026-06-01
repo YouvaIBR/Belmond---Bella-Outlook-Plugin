@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "bel-prd-bapi-prj",
+    "site": "bel-prd-vision-prj",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }]
