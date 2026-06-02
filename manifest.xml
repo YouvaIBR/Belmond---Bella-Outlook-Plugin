@@ -12,13 +12,13 @@
   <DisplayName DefaultValue="Bella - Belmond Assistant" />
   <Description DefaultValue="Generate a reply to this email using Bella, Belmond's AI assistant" />
 
-  <IconUrl DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
+  <IconUrl DefaultValue="https://bel-prd-vision-prj.web.app/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://bel-prd-vision-prj.web.app/icon-80.png" />
 
   <SupportUrl DefaultValue="https://www.belmond.com" />
 
   <AppDomains>
-    <AppDomain>https://<FIREBASE_DOMAIN></AppDomain>
+    <AppDomain>https://bel-prd-vision-prj.web.app</AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -34,7 +34,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
+        <SourceLocation DefaultValue="https://bel-prd-vision-prj.web.app/index.html" />
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -108,13 +108,13 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://<FIREBASE_DOMAIN>/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
+        <bt:Image id="Icon.16x16" DefaultValue="https://bel-prd-vision-prj.web.app/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://bel-prd-vision-prj.web.app/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://bel-prd-vision-prj.web.app/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="CommandsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
+        <bt:Url id="CommandsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/index.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Bella" />
@@ -200,14 +200,14 @@
 
       <Resources>
         <bt:Images>
-          <bt:Image id="Icon.16x16" DefaultValue="https://<FIREBASE_DOMAIN>/icon-16.png" />
-          <bt:Image id="Icon.32x32" DefaultValue="https://<FIREBASE_DOMAIN>/icon-32.png" />
-          <bt:Image id="Icon.80x80" DefaultValue="https://<FIREBASE_DOMAIN>/icon-80.png" />
+          <bt:Image id="Icon.16x16" DefaultValue="https://bel-prd-vision-prj.web.app/icon-16.png" />
+          <bt:Image id="Icon.32x32" DefaultValue="https://bel-prd-vision-prj.web.app/icon-32.png" />
+          <bt:Image id="Icon.80x80" DefaultValue="https://bel-prd-vision-prj.web.app/icon-80.png" />
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="CommandsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/commands.html" />
-          <bt:Url id="Taskpane.Url" DefaultValue="https://<FIREBASE_DOMAIN>/index.html" />
-          <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://<FIREBASE_DOMAIN>/launchEvents.html" />
+          <bt:Url id="CommandsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/commands.html" />
+          <bt:Url id="Taskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/index.html" />
+          <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/launchEvents.html" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Bella" />
@@ -222,7 +222,7 @@
 
       <WebApplicationInfo>
         <Id>e8919706-c411-4da6-9da5-5f1b1c836cfe</Id>
-        <Resource>api://<FIREBASE_DOMAIN>/e8919706-c411-4da6-9da5-5f1b1c836cfe</Resource>
+        <Resource>api://bel-prd-vision-prj.web.app/e8919706-c411-4da6-9da5-5f1b1c836cfe</Resource>
         <Scopes>
           <Scope>openid</Scope>
           <Scope>profile</Scope>

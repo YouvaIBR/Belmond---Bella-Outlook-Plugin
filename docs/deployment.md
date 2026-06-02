@@ -29,11 +29,16 @@ Outlook (Desktop + Web)
 
 1. Go to [portal.azure.com](https://portal.azure.com)
 2. **Entra ID** → **App registrations** → **New registration**
+
+   ![App registrations entry point](./Screenshot%202026-06-02%20at%2010.51.40.png)
+   ![Add app registration](./Screenshot%202026-06-02%20at%2010.51.52.png)
+
 3. Fill in:
    - **Name**: `bella-outlook-addin`
    - **Supported account types**: Single tenant
    - **Redirect URI**: Single-page application (SPA) → `brk-multihub://<FIREBASE_DOMAIN>`
 4. Click **Register**
+   ![App registration form](./Screenshot%202026-06-02%20at%2010.53.46.png)
 
 ### 1.2 Note the IDs
 
@@ -56,6 +61,10 @@ On the **Overview** page, copy:
 
 > **Set `accessTokenAcceptedVersion` to 2**: In Azure → **Manifest (JSON)**, set `"accessTokenAcceptedVersion": 2`. This is required to allow custom Application ID URIs with external domains (e.g. Firebase Hosting). If the field is not visible in the editor, do a hard refresh (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows) with cache cleared — Azure Portal sometimes requires a cache clear to display all manifest fields.
 
+![Authentication section](./Screenshot%202026-06-02%20at%2010.54.09.png)
+![SPA platform with Add URI](./Screenshot%202026-06-02%20at%2010.54.57.png)
+![Redirect URIs added](./Screenshot%202026-06-02%20at%2010.58.34.png)
+
 ### 1.4 Add API permissions
 
 **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated**:
@@ -65,7 +74,15 @@ On the **Overview** page, copy:
 - `email`
 - `User.Read`
 
+![API permissions section](./Screenshot%202026-06-02%20at%2010.59.11.png)
+![Add a permission — Microsoft Graph](./Screenshot%202026-06-02%20at%2010.59.23.png)
+![Delegated permissions selection](./Screenshot%202026-06-02%20at%2010.59.34.png)
+![Permissions added](./Screenshot%202026-06-02%20at%2010.59.52.png)
+
 Then click **Grant admin consent for [your tenant]**.
+
+![Admin consent granted](./Screenshot%202026-06-02%20at%2011.00.15.png)
+![Admin consent confirmation](./Screenshot%202026-06-02%20at%2011.00.25.png)
 
 ### 1.5 Expose an API
 
@@ -77,19 +94,75 @@ Then click **Grant admin consent for [your tenant]**.
    api://<FIREBASE_DOMAIN>/<YOUR_CLIENT_ID>
    ```
 
+   ![Expose an API — set Application ID URI](./Screenshot%202026-06-02%20at%2011.00.36.png)
+   ![Application ID URI saved](./Screenshot%202026-06-02%20at%2011.02.16.png)
+
    > This requires `accessTokenAcceptedVersion: 2` (see step 1.3). If your tenant policy blocks custom domains, use `api://<YOUR_CLIENT_ID>` and update the scope in `src/auth/msal.ts` accordingly.
+
+   ![accessTokenAcceptedVersion set to 2 in the JSON manifest](./Screenshot%202026-06-02%20at%2011.15.35.png)
 
 2. **Add a scope**:
 
-| Field                      | Value                                             |
-| -------------------------- | ------------------------------------------------- |
-| Scope name                 | `access_as_user`                                  |
-| Who can consent            | `Admins and users`                                |
-| Admin consent display name | `Access Bella as user`                            |
-| Admin consent description  | `Allows the add-in to access the API as the user` |
-| User consent display name  | `Access Bella as user`                            |
-| User consent description   | `Allows the add-in to access the API as you`      |
-| State                      | `Enabled`                                         |
+| Field                      | Value                                              |
+| -------------------------- | -------------------------------------------------- |
+| Scope name                 | `access_as_user`                                   |
+| Who can consent            | `Admins and users`                                 |
+| Admin consent display name | `Access Bella as admin`                            |
+| Admin consent description  | `Allows the add-in to access the API as the admin` |
+| User consent display name  | `Access Bella as user`                             |
+| User consent description   | `Allows the add-in to access the API as you`       |
+| State                      | `Enabled`                                          |
+
+![Add a scope — access_as_user](./Screenshot%202026-06-02%20at%2011.02.27.png)
+
+3. **Authorized client applications** — pre-authorize the Microsoft Office clients so users don't get a consent prompt when the add-in requests an access token. Click **Add a client application** and add each of these, checking the `access_as_user` scope you just created:
+
+| Client ID                              | Application                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------- |
+| `ea5a67f6-b6f3-4338-b240-c655ddc3cc8e` | All Microsoft Office endpoints (recommended — covers Web, Desktop, Mac, Mobile) |
+| `d3590ed6-52b3-4102-aeff-aad2292ab01c` | Microsoft Office (desktop, optional if the one above is already added)          |
+
+![Add a client application](./Screenshot%202026-06-02%20at%2011.07.09.png)
+![Authorized client application form](./Screenshot%202026-06-02%20at%2011.14.33.png)
+![Authorized client applications added](./Screenshot%202026-06-02%20at%2011.14.59.png)
+
+### 1.6 Restrict access to authorized users
+
+Restricting access lets you control who can use the add-in. The approach depends on your Entra ID licence:
+
+- **Entra ID P1 or higher** → assign a **security group** (recommended — easier to manage)
+- **Entra ID Free / Microsoft 365 Apps** → assign **individual users** (group assignment is not available)
+
+#### Assign a security group (Entra ID P1+)
+
+1. **Create the group** — go to **Entra ID** → **Groups** → **New group**:
+   - **Group type**: `Security`
+   - **Group name**: e.g. `bella-outlook-users`
+   - **Group description**: e.g. `Users authorized to use the Bella Outlook add-in`
+   - **Membership type**: `Assigned`
+   - Add the users who should have access
+   - Click **Create**
+
+   ![Groups section](./Screenshot%202026-06-02%20at%2011.19.06.png)
+   ![New group form](./Screenshot%202026-06-02%20at%2011.19.25.png)
+   ![Group created with members](./Screenshot%202026-06-02%20at%2011.23.12.png)
+
+2. **Require user assignment on the app** — go to **Entra ID** → **Enterprise applications** → select `bella-outlook-addin` → **Properties**:
+   - Set **Assignment required?** to `Yes`
+   - Click **Save**
+
+   ![Enterprise applications list](./Screenshot%202026-06-02%20at%2011.25.33.png)
+   ![Properties — Assignment required Yes](./Screenshot%202026-06-02%20at%2011.26.10.png)
+   ![Properties saved](./Screenshot%202026-06-02%20at%2011.28.28.png)
+
+3. **Assign the group to the app** — still in the Enterprise application, go to **Users and groups** → **Add user/group**:
+   - Select the `bella-outlook-users` group
+   - Click **Assign**
+
+   ![Add user/group dialog](./Screenshot%202026-06-02%20at%2012.41.54.png)
+   ![Group assigned to the app](./Screenshot%202026-06-02%20at%2012.42.27.png)
+
+> Users not assigned will get an `Access denied` error when opening the add-in.
 
 ---
 
@@ -107,6 +180,7 @@ Then click **Grant admin consent for [your tenant]**.
 ```json
 {
   "hosting": {
+    "site": "bel-prd-vision-prj",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }]
@@ -118,25 +192,25 @@ Then click **Grant admin consent for [your tenant]**.
 
 CI authentication to Firebase is handled via WIF — no static token or service account key required. GCP is already configured. Contact Daniel González (daniel.gonzalez@belmond.com) for any IAM changes.
 
-| Resource | Value |
-| -------- | ----- |
-| Service account | `bel-prd-bapi-sac-fb-hosting@bel-prd-bapi-prj.iam.gserviceaccount.com` |
-| WIF provider | `projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab` |
-| Firebase project | `bel-prd-bapi-prj` |
+| Resource         | Value                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| Service account  | `bel-prd-bapi-sac-fb-hosting@bel-prd-bapi-prj.iam.gserviceaccount.com`                                        |
+| WIF provider     | `projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab` |
+| Firebase project | `bel-prd-bapi-prj`                                                                                            |
 
 ### 2.4 Add GitLab CI/CD variables
 
 **GitLab** → **Settings** → **CI/CD** → **Variables** → **Add variable**:
 
-| Variable name           | Value                                          |
-| ----------------------- | ---------------------------------------------- |
-| `VITE_CLIENT_ID`        | Azure Application (client) ID                  |
-| `VITE_TENANT_ID`        | Azure Directory (tenant) ID                    |
-| `VITE_N8N_WEBHOOK_URL`  | n8n webhook URL                                |
-| `FIREBASE_PROJECT_ID`   | Firebase project ID (provided by client)       |
+| Variable name           | Value                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `VITE_CLIENT_ID`        | Azure Application (client) ID                                                 |
+| `VITE_TENANT_ID`        | Azure Directory (tenant) ID                                                   |
+| `VITE_N8N_WEBHOOK_URL`  | n8n webhook URL                                                               |
+| `FIREBASE_PROJECT_ID`   | Firebase project ID (provided by client)                                      |
 | `GCP_WIF_PROVIDER_URL`  | Full WIF provider URL — `https://iam.googleapis.com/...` (provided by client) |
-| `GCP_WIF_PROVIDER_PATH` | WIF provider path without scheme (provided by client) |
-| `GCP_SERVICE_ACCOUNT`   | GCP service account email (provided by client) |
+| `GCP_WIF_PROVIDER_PATH` | WIF provider path without scheme (provided by client)                         |
+| `GCP_SERVICE_ACCOUNT`   | GCP service account email (provided by client)                                |
 
 > No Firebase token or key needed — authentication is handled automatically by WIF in the CI job.
 
