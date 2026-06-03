@@ -11,7 +11,7 @@ GitLab repo (source)
       │
       │  git push → GitLab CI/CD
       ▼
-Firebase Hosting (https://<FIREBASE_DOMAIN>)
+Firebase Hosting (https://bel-prd-vision-prj.web.app)
       │
       │  manifest.xml references this URL
       ▼
@@ -36,7 +36,7 @@ Outlook (Desktop + Web)
 3. Fill in:
    - **Name**: `bella-outlook-addin`
    - **Supported account types**: Single tenant
-   - **Redirect URI**: Single-page application (SPA) → `brk-multihub://<FIREBASE_DOMAIN>`
+   - **Redirect URI**: Single-page application (SPA) → `brk-multihub://bel-prd-vision-prj.web.app`
 4. Click **Register**
    ![App registration form](./Screenshot%202026-06-02%20at%2010.53.46.png)
 
@@ -51,13 +51,13 @@ On the **Overview** page, copy:
 
 **Authentication** → existing SPA platform → **Add URI**, add all of these:
 
-| URI                                          | Purpose                                       |
-| -------------------------------------------- | --------------------------------------------- |
-| `brk-multihub://<FIREBASE_DOMAIN>`           | NAA broker (standard)                         |
-| `brk-<TENANT_BROKER_ID>://<FIREBASE_DOMAIN>` | NAA broker (tenant-specific — see note below) |
-| `https://<FIREBASE_DOMAIN>/index.html`       | Outlook Web                                   |
+| URI                                                   | Purpose                                       |
+| ----------------------------------------------------- | --------------------------------------------- |
+| `brk-multihub://bel-prd-vision-prj.web.app`           | NAA broker (standard)                         |
+| `brk-<TENANT_BROKER_ID>://bel-prd-vision-prj.web.app` | NAA broker (tenant-specific — see note below) |
+| `https://bel-prd-vision-prj.web.app/index.html`       | Outlook Web                                   |
 
-> **Important — Tenant-specific broker ID**: Do not add this URI yet — you won't have the `TENANT_BROKER_ID` until after the first authentication attempt. The flow is: deploy the add-in → open it in Outlook → if you get the error `Invalid Reply Address. Reply Address must have scheme brk-XXXX://`, copy the `brk-XXXX` value from the failing request URL in DevTools, then come back here and add `brk-XXXX://<FIREBASE_DOMAIN>` as a redirect URI.
+> **Important — Tenant-specific broker ID**: Do not add this URI yet — you won't have the `TENANT_BROKER_ID` until after the first authentication attempt. The flow is: deploy the add-in → open it in Outlook → if you get the error `Invalid Reply Address. Reply Address must have scheme brk-XXXX://`, copy the `brk-XXXX` value from the failing request URL in DevTools, then come back here and add `brk-XXXX://bel-prd-vision-prj.web.app` as a redirect URI.
 
 > **Set `accessTokenAcceptedVersion` to 2**: In Azure → **Manifest (JSON)**, set `"accessTokenAcceptedVersion": 2`. This is required to allow custom Application ID URIs with external domains (e.g. Firebase Hosting). If the field is not visible in the editor, do a hard refresh (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows) with cache cleared — Azure Portal sometimes requires a cache clear to display all manifest fields.
 
@@ -91,7 +91,7 @@ Then click **Grant admin consent for [your tenant]**.
 1. **Application ID URI** — set to:
 
    ```
-   api://<FIREBASE_DOMAIN>/<YOUR_CLIENT_ID>
+   api://bel-prd-vision-prj.web.app/<YOUR_CLIENT_ID>
    ```
 
    ![Expose an API — set Application ID URI](./Screenshot%202026-06-02%20at%2011.00.36.png)
@@ -226,7 +226,7 @@ git push origin main
 The add-in will be live at:
 
 ```
-https://<FIREBASE_DOMAIN>/index.html
+https://bel-prd-vision-prj.web.app/index.html
 ```
 
 ---
@@ -238,7 +238,7 @@ Make sure `manifest.xml` contains:
 ```xml
 <WebApplicationInfo>
   <Id>YOUR_CLIENT_ID</Id>
-  <Resource>api://<FIREBASE_DOMAIN>/YOUR_CLIENT_ID</Resource>
+  <Resource>api://bel-prd-vision-prj.web.app/YOUR_CLIENT_ID</Resource>
   <Scopes>
     <Scope>openid</Scope>
     <Scope>profile</Scope>
@@ -298,14 +298,14 @@ If you cannot deploy via the admin center, sideload directly for your own accoun
 
 ## Troubleshooting
 
-| Symptom                                                      | Cause                                    | Fix                                                                                                                                      |
-| ------------------------------------------------------------ | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `Signing in…` stuck forever                                  | MSAL auth failing — Office.js not loaded | Check that assets load correctly (no 404s in DevTools console)                                                                           |
-| `Invalid Reply Address. Must have scheme brk-XXXX://`        | Tenant uses a custom broker scheme       | Add `brk-XXXX://<FIREBASE_DOMAIN>` as SPA redirect URI in Azure (where XXXX is the `brk_client_id` from the failing request in DevTools) |
-| `Manifest file validation has failed`                        | Wrong portal used                        | Use `https://admin.microsoft.com/AdminPortal/Home#/Settings/AddIns`, not "Integrated Apps"                                               |
-| `Wrong Package. Your package does not match submission type` | Uploaded XML to Teams/M365 Apps portal   | Use the Add-ins portal link above                                                                                                        |
-| `This operation was unsuccessful — eligibility requirements` | Admin account lacks required role        | Assign **Exchange Administrator** or **Global Administrator** role                                                                       |
-| Add-in not showing after deployment                          | Propagation delay                        | Wait up to 72h, or sideload via `https://aka.ms/olksideload`                                                                             |
-| `401` from n8n webhook                                       | JWT token audience mismatch              | Check n8n JWT credential — the PEM key must match the current Microsoft signing key (run `get_pem_from_kid.sh`)                          |
-| `Access denied` on the add-in page                           | User not authorized                      | Check Azure → Enterprise applications → assign users                                                                                     |
-| `Failed to load resource: 404` on assets                     | Wrong Firebase deploy or `dist` path     | Check `firebase.json` points to `"public": "dist"` and that the build completed successfully                                             |
+| Symptom                                                      | Cause                                    | Fix                                                                                                                                               |
+| ------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Signing in…` stuck forever                                  | MSAL auth failing — Office.js not loaded | Check that assets load correctly (no 404s in DevTools console)                                                                                    |
+| `Invalid Reply Address. Must have scheme brk-XXXX://`        | Tenant uses a custom broker scheme       | Add `brk-XXXX://bel-prd-vision-prj.web.app` as SPA redirect URI in Azure (where XXXX is the `brk_client_id` from the failing request in DevTools) |
+| `Manifest file validation has failed`                        | Wrong portal used                        | Use `https://admin.microsoft.com/AdminPortal/Home#/Settings/AddIns`, not "Integrated Apps"                                                        |
+| `Wrong Package. Your package does not match submission type` | Uploaded XML to Teams/M365 Apps portal   | Use the Add-ins portal link above                                                                                                                 |
+| `This operation was unsuccessful — eligibility requirements` | Admin account lacks required role        | Assign **Exchange Administrator** or **Global Administrator** role                                                                                |
+| Add-in not showing after deployment                          | Propagation delay                        | Wait up to 72h, or sideload via `https://aka.ms/olksideload`                                                                                      |
+| `401` from n8n webhook                                       | JWT token audience mismatch              | Check n8n JWT credential — the PEM key must match the current Microsoft signing key (run `get_pem_from_kid.sh`)                                   |
+| `Access denied` on the add-in page                           | User not authorized                      | Check Azure → Enterprise applications → assign users                                                                                              |
+| `Failed to load resource: 404` on assets                     | Wrong Firebase deploy or `dist` path     | Check `firebase.json` points to `"public": "dist"` and that the build completed successfully                                                      |

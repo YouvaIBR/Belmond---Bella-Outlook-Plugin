@@ -43,7 +43,7 @@ After importing, update the hardcoded `CLIENT_ID` in the **Validate JWT (JWKS)**
 - **Path**: `bella-outlook`
 - **Authentication**: `None` (JWT validation is handled by the Code node)
 - **Response Mode**: `Using 'Respond to Webhook' Node`
-- **Allowed Origins (CORS)**: `https://<FIREBASE_DOMAIN>`
+- **Allowed Origins (CORS)**: `https://bel-prd-vision-prj.web.app`
 
 ---
 
@@ -60,7 +60,7 @@ Connected to **Respond OPTIONS**, which returns:
 
 - **Response Code**: `204`
 - **Headers**:
-  - `Access-Control-Allow-Origin`: `https://<FIREBASE_DOMAIN>`
+  - `Access-Control-Allow-Origin`: `https://bel-prd-vision-prj.web.app`
   - `Access-Control-Allow-Methods`: `POST, OPTIONS`
   - `Access-Control-Allow-Headers`: `Authorization, Content-Type`
 
@@ -96,7 +96,7 @@ Connected to **Respond OPTIONS**, which returns:
 - **Respond With**: `JSON`
 - **Body**: `={{ JSON.stringify($json) }}`
 - **Headers**:
-  - `Access-Control-Allow-Origin`: `https://<FIREBASE_DOMAIN>`
+  - `Access-Control-Allow-Origin`: `https://bel-prd-vision-prj.web.app`
 
 ---
 
@@ -106,7 +106,7 @@ Connected to **Respond OPTIONS**, which returns:
 - **Respond With**: `JSON`
 - **Body**: `={{ JSON.stringify({ error: $json.error }) }}`
 - **Headers**:
-  - `Access-Control-Allow-Origin`: `https://<FIREBASE_DOMAIN>`
+  - `Access-Control-Allow-Origin`: `https://bel-prd-vision-prj.web.app`
 
 ---
 
@@ -142,18 +142,18 @@ Use `/webhook-test/` during development (workflow does not need to be active). U
 
 ## Updating the CORS origin (Firebase migration)
 
-All three `Respond` nodes have a hardcoded `Access-Control-Allow-Origin` header, as does the `Webhook POST` node's **Allowed Origins** field. After switching to Firebase Hosting, update all four occurrences from `https://youvaibr.github.io` to `https://<FIREBASE_DOMAIN>`.
+All three `Respond` nodes have a hardcoded `Access-Control-Allow-Origin` header, as does the `Webhook POST` node's **Allowed Origins** field.
 
 ---
 
 ## Troubleshooting
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Invalid signature` (intermittent 403) | Was using static PEM — Microsoft rotated key | Use the JWKS-based workflow (dynamic key lookup, no manual PEM needed) |
-| `Key not found for kid: ...` | Token signed with unknown key | Microsoft occasionally publishes new keys before retiring old ones — wait a few minutes and retry |
-| `Token expired` | JWT older than ~1h | MSAL should refresh automatically; if not, re-authenticate |
-| `Invalid audience` | Token `aud` doesn't match CLIENT_ID | Check the `CLIENT_ID` constant in the **Validate JWT (JWKS)** Code node matches your Azure app registration |
-| `401` on Bella call | Cookie credential expired | Update the `Cookie` header value in the **HTTP Request** node |
-| `ERR_FAILED` / CORS error in browser | Missing or wrong `Access-Control-Allow-Origin` | Update all CORS headers and Allowed Origins to the current hosting domain |
-| Preflight blocked | OPTIONS node missing or path mismatch | Ensure `Webhook OPTIONS` uses the exact same path as `Webhook POST` (`bella-outlook`) |
+| Error                                  | Cause                                          | Fix                                                                                                         |
+| -------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Invalid signature` (intermittent 403) | Was using static PEM — Microsoft rotated key   | Use the JWKS-based workflow (dynamic key lookup, no manual PEM needed)                                      |
+| `Key not found for kid: ...`           | Token signed with unknown key                  | Microsoft occasionally publishes new keys before retiring old ones — wait a few minutes and retry           |
+| `Token expired`                        | JWT older than ~1h                             | MSAL should refresh automatically; if not, re-authenticate                                                  |
+| `Invalid audience`                     | Token `aud` doesn't match CLIENT_ID            | Check the `CLIENT_ID` constant in the **Validate JWT (JWKS)** Code node matches your Azure app registration |
+| `401` on Bella call                    | Cookie credential expired                      | Update the `Cookie` header value in the **HTTP Request** node                                               |
+| `ERR_FAILED` / CORS error in browser   | Missing or wrong `Access-Control-Allow-Origin` | Update all CORS headers and Allowed Origins to the current hosting domain                                   |
+| Preflight blocked                      | OPTIONS node missing or path mismatch          | Ensure `Webhook OPTIONS` uses the exact same path as `Webhook POST` (`bella-outlook`)                       |

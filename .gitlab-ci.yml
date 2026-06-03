@@ -46,10 +46,6 @@ test:
 build:
   stage: build
   needs: [install, lint, test]
-  variables:
-    VITE_CLIENT_ID: $VITE_CLIENT_ID
-    VITE_TENANT_ID: $VITE_TENANT_ID
-    VITE_N8N_WEBHOOK_URL: $VITE_N8N_WEBHOOK_URL
   script:
     - npm run build
   artifacts:
