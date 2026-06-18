@@ -28,7 +28,7 @@ const SCOPES = [
   "openid",
   "profile",
   "email",
-  `api://bel-prd-vision-prj.web.app/${CLIENT_ID}/access_as_user`,
+  `api://youvaibr.github.io/${CLIENT_ID}/access_as_user`,
 ];
 
 export async function acquireToken(): Promise<string> {
