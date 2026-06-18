@@ -121,8 +121,39 @@ function openMockForm(): void {
   (document.getElementById("attachment-list") as HTMLElement).replaceChildren();
   (document.getElementById("attachment-picker") as HTMLElement).hidden = false;
 
+  // Mock prefill: once the user picks files, simulate Bella reading them.
+  const fileInput = document.getElementById("f-fileInput") as HTMLInputElement;
+  fileInput.addEventListener(
+    "change",
+    () => {
+      if ((fileInput.files?.length ?? 0) > 0) void runMockPrefill();
+    },
+    { once: true },
+  );
+
   syncMockSubmit();
   showWorkdayPanel("workday-form");
+}
+
+async function runMockPrefill(): Promise<void> {
+  const hint = document.getElementById("form-prefilling");
+  if (hint) hint.hidden = false;
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  if (hint) hint.hidden = true;
+
+  // Fill the first option of each select + sample text values.
+  for (const { id, key } of SELECT_FIELDS) {
+    const select = document.getElementById(id) as HTMLSelectElement;
+    const first = mockWorkdayOptions[key][0];
+    if (first) select.value = first.id;
+  }
+  (document.getElementById("f-itemDescription") as HTMLInputElement).value =
+    "Architecture consultancy — pool area redesign";
+  (document.getElementById("f-unitCost") as HTMLInputElement).value = "1000";
+  (document.getElementById("f-quantity") as HTMLInputElement).value = "1";
+  (document.getElementById("f-supplierItemIdentifier") as HTMLInputElement).value = "TEST1234";
+  console.info("[MOCK] Prefill applied from email + documents.");
+  syncMockSubmit();
 }
 
 function syncMockSubmit(): void {

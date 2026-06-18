@@ -46,6 +46,7 @@ jobs:
           VITE_N8N_WEBHOOK_URL: ${{ secrets.VITE_N8N_WEBHOOK_URL }}
           VITE_N8N_WORKDAY_DATA_URL: ${{ secrets.VITE_N8N_WORKDAY_DATA_URL }}
           VITE_N8N_WORKDAY_SUBMIT_URL: ${{ secrets.VITE_N8N_WORKDAY_SUBMIT_URL }}
+          VITE_N8N_WORKDAY_PREFILL_URL: ${{ secrets.VITE_N8N_WORKDAY_PREFILL_URL }}
 
       - uses: actions/configure-pages@v5
 

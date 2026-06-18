@@ -62,6 +62,32 @@ export interface WorkdayDataResponse {
 // documents. The backend agent parses the query, so no structured payload type
 // is needed on the client.
 
+// Fields returned by the prefill endpoint: the AI's best match for each form
+// field, as ids (selects) + free-text values. Empty string = no confident match.
+export interface PrefillData {
+  requisition_type_id: string;
+  company_id: string;
+  currency_id: string;
+  requester_id: string;
+  ship_to_contact_id: string;
+  business_unit_id: string;
+  cost_center_id: string;
+  spend_category_id: string;
+  supplier_id: string;
+  unit_of_measure_id: string;
+  item_name: string;
+  unit_cost: string;
+  quantity: string;
+  supplier_item_identifier: string;
+  memo: string;
+  high_priority: boolean;
+}
+
+export interface PrefillResponse {
+  success: boolean;
+  data: PrefillData;
+}
+
 export type UIPanel = "auth-loading" | "access-denied" | "main-panel" | "loading" | "result";
 
 export type WorkdayPanel =

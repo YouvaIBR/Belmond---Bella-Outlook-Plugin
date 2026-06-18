@@ -3,6 +3,8 @@ import type {
   AgentRequest,
   AgentResponse,
   BellaRawResponse,
+  PrefillData,
+  PrefillResponse,
   WorkdayDataResponse,
   WorkdayOptions,
 } from "../types/index.js";
@@ -10,6 +12,7 @@ import type {
 const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL as string;
 const WORKDAY_DATA_URL = import.meta.env.VITE_N8N_WORKDAY_DATA_URL as string;
 const WORKDAY_SUBMIT_URL = import.meta.env.VITE_N8N_WORKDAY_SUBMIT_URL as string;
+const WORKDAY_PREFILL_URL = import.meta.env.VITE_N8N_WORKDAY_PREFILL_URL as string;
 
 export class AgentError extends Error {
   constructor(
@@ -148,6 +151,47 @@ export async function submitRequisition(
   }
 
   return raw.mail_template ?? "";
+}
+
+// Asks the prefill endpoint to read the email + the documents and return the
+// best-matched form fields. Sent as multipart/form-data: the email context as
+// text fields, the binary documents (max 5) under `attachments`. The documents
+// are only analysed (not stored). Returns the matched fields, or null on
+// failure (prefill is best-effort and must never block the form).
+export async function prefillRequisition(
+  email: { emailBody: string; emailSubject: string; emailFrom: string },
+  attachments: File[],
+  prefillUrl = WORKDAY_PREFILL_URL,
+): Promise<PrefillData | null> {
+  const token = await acquireToken();
+
+  const form = new FormData();
+  form.append("emailBody", email.emailBody);
+  form.append("emailSubject", email.emailSubject);
+  form.append("emailFrom", email.emailFrom);
+  for (const file of attachments) {
+    form.append("attachments", file, file.name);
+  }
+
+  const response = await fetch(prefillUrl, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new AgentError(response.status, (await response.text()) || response.statusText);
+  }
+
+  const text = await response.text();
+  if (!text) return null;
+
+  try {
+    const parsed = JSON.parse(text) as PrefillResponse;
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
 }
 
 export function parseBellaResponse(raw: BellaRawResponse): AgentResponse {
