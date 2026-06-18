@@ -1,8 +1,18 @@
-import { AgentError, fetchWorkdayData, submitRequisition } from "./api/agent.js";
+import {
+  AgentError,
+  fetchWorkdayData,
+  prefillRequisition,
+  submitRequisition,
+} from "./api/agent.js";
 import { initializeWorkdayMock } from "./mock/mockOffice.js";
 import { getPdfAttachments } from "./services/attachments.js";
 import { getMailItem, getUserDisplayName } from "./services/office.js";
-import type { WorkdayOption, WorkdayOptions, WorkdayPanel } from "./types/index.js";
+import type {
+  PrefillData,
+  WorkdayOption,
+  WorkdayOptions,
+  WorkdayPanel,
+} from "./types/index.js";
 import { sanitizeHtml } from "./ui/draft.js";
 
 const IS_MOCK = import.meta.env.VITE_MOCK === "true";
@@ -33,6 +43,8 @@ const SELECT_FIELDS: { id: string; key: keyof WorkdayOptions }[] = [
 let options: WorkdayOptions | null = null;
 // PDF attachments pulled from the email (empty → user must pick from computer).
 let emailAttachments: File[] = [];
+// Prefill runs at most once per form opening.
+let prefillRan = false;
 
 function showPanel(panel: WorkdayPanel): void {
   for (const id of WORKDAY_PANEL_IDS) {
@@ -108,6 +120,15 @@ function attachEventListeners(): void {
   // Any field change re-evaluates whether submit can be enabled.
   form?.addEventListener("input", () => syncSubmitEnabled());
   form?.addEventListener("change", () => syncSubmitEnabled());
+
+  // When the email has no documents, the user picks files from disk — prefill
+  // fires once they have (only relevant in that no-email-attachment case).
+  document.getElementById("f-fileInput")?.addEventListener("change", () => {
+    if (emailAttachments.length === 0) {
+      const picked = getPickedFiles();
+      if (picked.length > 0) void runPrefill(picked);
+    }
+  });
 }
 
 // ── Form setup ────────────────────────────────────────────────────────────
@@ -116,6 +137,8 @@ async function openRequisitionForm(): Promise<void> {
   clearError();
   if (!options) return;
 
+  prefillRan = false;
+  resetForm();
   populateSelects(options);
 
   try {
@@ -127,6 +150,85 @@ async function openRequisitionForm(): Promise<void> {
 
   syncSubmitEnabled();
   showPanel("workday-form");
+
+  // If the email already has documents, prefill straight away. Otherwise wait
+  // until the user picks files (handled in the file-input change listener).
+  if (emailAttachments.length > 0) {
+    void runPrefill(emailAttachments);
+  }
+}
+
+function resetForm(): void {
+  const form = document.getElementById("requisition-form") as HTMLFormElement;
+  form.reset();
+}
+
+// Calls the prefill endpoint once and applies the matched fields to the form.
+// Best-effort: any failure leaves the form blank and never blocks the user.
+async function runPrefill(attachments: File[]): Promise<void> {
+  if (prefillRan || attachments.length === 0) return;
+  prefillRan = true;
+
+  setPrefilling(true);
+  try {
+    const mailItem = await getMailItem();
+    const data = await prefillRequisition(
+      {
+        emailBody: mailItem.body,
+        emailSubject: mailItem.subject,
+        emailFrom: mailItem.from,
+      },
+      attachments,
+    );
+    if (data) applyPrefill(data);
+  } catch {
+    // Prefill is optional — ignore errors, the user fills the form manually.
+  } finally {
+    setPrefilling(false);
+    syncSubmitEnabled();
+  }
+}
+
+const PREFILL_FIELD_MAP: { id: string; key: keyof PrefillData }[] = [
+  { id: "f-requisitionType", key: "requisition_type_id" },
+  { id: "f-company", key: "company_id" },
+  { id: "f-currency", key: "currency_id" },
+  { id: "f-requester", key: "requester_id" },
+  { id: "f-businessUnit", key: "business_unit_id" },
+  { id: "f-costCenter", key: "cost_center_id" },
+  { id: "f-spendCategory", key: "spend_category_id" },
+  { id: "f-supplier", key: "supplier_id" },
+  { id: "f-shipToContact", key: "ship_to_contact_id" },
+  { id: "f-unitOfMeasure", key: "unit_of_measure_id" },
+  { id: "f-itemDescription", key: "item_name" },
+  { id: "f-unitCost", key: "unit_cost" },
+  { id: "f-quantity", key: "quantity" },
+  { id: "f-supplierItemIdentifier", key: "supplier_item_identifier" },
+  { id: "f-memo", key: "memo" },
+];
+
+function applyPrefill(data: PrefillData): void {
+  for (const { id, key } of PREFILL_FIELD_MAP) {
+    const value = data[key];
+    if (typeof value !== "string" || value === "") continue;
+    const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null;
+    if (!el) continue;
+    // For a select, only apply if the matched id exists as an option.
+    if (el instanceof HTMLSelectElement && !Array.from(el.options).some((o) => o.value === value)) {
+      continue;
+    }
+    el.value = value;
+  }
+  const highPriority = document.getElementById("f-highPriority") as HTMLInputElement | null;
+  if (highPriority) highPriority.checked = data.high_priority === true;
+}
+
+// Toggles a lightweight "reading" hint + disables submit while prefill runs.
+function setPrefilling(active: boolean): void {
+  const el = document.getElementById("form-prefilling");
+  if (el) el.hidden = !active;
+  const submit = document.getElementById("submit-requisition-btn") as HTMLButtonElement;
+  if (active) submit.disabled = true;
 }
 
 function populateSelects(opts: WorkdayOptions): void {
