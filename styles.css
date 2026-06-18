@@ -387,6 +387,41 @@ html, body {
   margin-top: 4px;
 }
 
+/* Signed-in user name — centered within the panel, not in the header */
+.signed-in {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.signed-in::before,
+.signed-in::after {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.chat-empty .signed-in {
+  margin-top: 20px;
+}
+
+/* Center the index loading panel so the signed-in line sits mid-panel */
+.loading-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 70vh;
+}
+
 .panel-title {
   font-family: var(--f-display);
   font-size: 20px;
@@ -443,57 +478,436 @@ html, body {
   border-color: var(--ink-mid);
 }
 
-/* ── Error message inline ── */
-.error-message {
+/* ════════════════════════════════════════════════════════════════════════
+   Workday (actions list + requisition form)
+   ════════════════════════════════════════════════════════════════════════ */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The Workday panel owns the full viewport: fixed header, scrolling body. */
+.workday-body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The [hidden] attribute must win over the flex display rules below. */
+.workday-body [hidden] {
+  display: none !important;
+}
+
+/* ── Boot / access panels ── */
+.boot-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 100vh;
+  padding: 40px 28px;
+  text-align: center;
+}
+
+.boot-mark {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 30px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.boot-mark::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  margin: 12px auto 0;
+}
+
+.boot-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-family: var(--f-display);
+  font-size: 13px;
+}
+
+/* ── Workday shell (actions / form / result) ── */
+.wd-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.wd-header {
+  flex-shrink: 0;
+  background: var(--ink);
+  padding: 16px 18px 15px;
+}
+
+.wd-header h1 {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  line-height: 1;
+}
+
+.wd-header p {
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1;
+}
+
+.wd-header::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  margin-top: 12px;
+}
+
+/* Form header with a back button */
+.wd-header-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wd-header-form::after { display: none; }
+
+.wd-back {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--white);
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.18s var(--ease);
+}
+
+.wd-back:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ── Actions list ── */
+.wd-actions-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+}
+
+.wd-section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
   margin-bottom: 12px;
-  color: var(--error-text);
+}
+
+.wd-action-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), transform 0.12s var(--ease);
+}
+
+.wd-action-card:hover {
+  border-color: var(--border-dark);
+  box-shadow: 0 2px 14px rgba(17, 17, 16, 0.06);
+}
+
+.wd-action-card:active { transform: scale(0.99); }
+
+.wd-action-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--gold);
+}
+
+.wd-action-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.wd-action-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.wd-action-desc {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.wd-action-arrow {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  font-size: 15px;
+}
+
+.wd-footer-user {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Requisition form ── */
+.wd-form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wd-form-group-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wd-field-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-mid);
+}
+
+.wd-optional,
+.wd-req {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.wd-optional { color: var(--ink-faint); }
+.wd-req { color: var(--gold); }
+
+.wd-input,
+.wd-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-dark);
+  border-radius: 4px;
+  font-family: var(--f-body);
+  font-size: 13px;
+  color: var(--ink-mid);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.wd-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237C7A76' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+}
+
+.wd-textarea {
+  resize: vertical;
+  min-height: 56px;
+  line-height: 1.5;
+}
+
+.wd-input:focus,
+.wd-select:focus {
+  border-color: var(--ink-mid);
+  box-shadow: 0 0 0 3px rgba(17, 17, 16, 0.04);
+}
+
+.wd-row {
+  display: flex;
+  gap: 10px;
+}
+
+.wd-row .wd-field { flex: 1; }
+
+.wd-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--ink-mid);
+  cursor: pointer;
+}
+
+.wd-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.wd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* Attachments */
+.wd-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wd-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
   font-size: 12px;
+  color: var(--ink-mid);
+  word-break: break-all;
+}
+
+.wd-attachment-item::before {
+  content: '📎';
+  font-size: 12px;
+}
+
+.wd-attachment-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wd-file-input {
+  width: 100%;
+  font-size: 12px;
+  color: var(--ink-mid);
+  padding: 9px;
+  border: 1px dashed var(--border-dark);
+  border-radius: 4px;
+  background: var(--off-white);
+  cursor: pointer;
+}
+
+.wd-file-input::file-selector-button {
+  font-family: var(--f-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  background: var(--white);
+  border: 1px solid var(--border-dark);
+  border-radius: 3px;
+  padding: 6px 12px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.wd-attachment-hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.wd-form .btn-primary {
+  margin-top: 6px;
+}
+
+/* ── Result ── */
+.wd-result-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wd-success-badge {
+  align-self: flex-start;
+  padding: 6px 13px;
+  background: #E6F4EA;
+  color: #2C5F3A;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.wd-result-content {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-mid);
+}
+
+.wd-result-content p { margin-bottom: 9px; }
+.wd-result-content p:last-child { margin-bottom: 0; }
+.wd-result-content b { color: var(--ink); }
+
+/* Reuse the inline error styling from the form */
+.chat-error {
+  flex-shrink: 0;
+  margin: 12px 16px 0;
+  padding: 9px 13px;
   background: var(--error-bg);
   border: 1px solid var(--border);
   border-top: 2px solid var(--error-line);
   border-radius: 3px;
-  padding: 10px 14px;
-  display: none;
-}
-
-.error-message:not(:empty) {
-  display: block;
-}
-
-/* ── Generic btn base + action row ── */
-.btn {
-  padding: 12px 20px;
-  border-radius: 3px;
-  font-family: var(--f-body);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
-  flex: 1;
-}
-
-.action-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.action-row .btn-secondary,
-.action-row .btn-primary {
-  margin-top: 0;
-}
-
-/* ── Result content boxes ── */
-.result-content {
+  color: var(--error-text);
   font-size: 12px;
-  color: var(--ink-soft);
-  line-height: 1.55;
-  padding: 10px 12px;
-  background: var(--off-white);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  margin-bottom: 12px;
+  line-height: 1.45;
 }

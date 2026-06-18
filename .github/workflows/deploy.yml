@@ -40,9 +40,12 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          VITE_BASE: /Belmond---Bella-Outlook-Plugin/
           VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
           VITE_TENANT_ID: ${{ secrets.VITE_TENANT_ID }}
           VITE_N8N_WEBHOOK_URL: ${{ secrets.VITE_N8N_WEBHOOK_URL }}
+          VITE_N8N_WORKDAY_DATA_URL: ${{ secrets.VITE_N8N_WORKDAY_DATA_URL }}
+          VITE_N8N_WORKDAY_SUBMIT_URL: ${{ secrets.VITE_N8N_WORKDAY_SUBMIT_URL }}
 
       - uses: actions/configure-pages@v5
 

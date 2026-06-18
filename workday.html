@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bella — Belmond AI (Workday)</title>
+    <script
+      type="text/javascript"
+      src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"
+    ></script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body class="workday-body">
+    <!-- Auth / boot loading -->
+    <section id="auth-loading" class="panel boot-panel" aria-live="polite">
+      <div class="boot-mark">Bella</div>
+      <div class="boot-status">
+        <span class="spinner"></span>
+        <span>Preparing your workspace…</span>
+      </div>
+    </section>
+
+    <!-- Access denied -->
+    <section id="access-denied" class="panel boot-panel" hidden>
+      <div class="boot-mark">Bella</div>
+      <h1 class="panel-title">Access denied</h1>
+      <p class="panel-body">You don't have permission to use Bella. Contact your administrator.</p>
+    </section>
+
+    <!-- Loading (submit in progress) -->
+    <section id="loading" class="panel boot-panel" hidden aria-live="polite">
+      <div class="boot-status">
+        <span class="spinner"></span>
+        <span>Submitting your requisition…</span>
+      </div>
+    </section>
+
+    <!-- Actions list -->
+    <section id="workday-actions" class="wd-shell" hidden>
+      <header class="wd-header">
+        <h1>Bella</h1>
+        <p>Workday Assistant</p>
+      </header>
+
+      <div class="wd-actions-body">
+        <p class="wd-section-label">Actions</p>
+        <button type="button" class="wd-action-card" data-action="submit-requisition">
+          <span class="wd-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 4h6l3 3v13H6V4z" />
+              <path d="M9 12h6 M9 16h6 M9 8h2" />
+            </svg>
+          </span>
+          <span class="wd-action-text">
+            <span class="wd-action-title">Submit Requisition</span>
+            <span class="wd-action-desc">Create a requisition, attach documents and submit for approval.</span>
+          </span>
+          <span class="wd-action-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <p id="user-name" class="signed-in wd-footer-user" hidden></p>
+    </section>
+
+    <!-- Submit Requisition form -->
+    <section id="workday-form" class="wd-shell" hidden>
+      <header class="wd-header wd-header-form">
+        <button type="button" id="form-back-btn" class="wd-back" aria-label="Back to actions">←</button>
+        <div>
+          <h1>Submit Requisition</h1>
+          <p>Workday</p>
+        </div>
+      </header>
+
+      <div id="form-error" class="chat-error" role="alert" aria-live="assertive" hidden></div>
+
+      <form id="requisition-form" class="wd-form">
+        <p class="wd-form-group-label">Requisition</p>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Requisition type</span>
+          <select id="f-requisitionType" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Company</span>
+          <select id="f-company" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Currency</span>
+          <select id="f-currency" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Requester</span>
+          <select id="f-requester" class="wd-select"></select>
+        </label>
+
+        <label class="wd-check">
+          <input id="f-highPriority" type="checkbox" />
+          <span>High priority</span>
+        </label>
+
+        <div class="wd-divider"></div>
+        <p class="wd-form-group-label">Line item</p>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Item description</span>
+          <input id="f-itemDescription" type="text" class="wd-input" />
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Business unit</span>
+          <select id="f-businessUnit" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Cost center</span>
+          <select id="f-costCenter" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Spend category</span>
+          <select id="f-spendCategory" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Supplier</span>
+          <select id="f-supplier" class="wd-select"></select>
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Ship-to contact</span>
+          <select id="f-shipToContact" class="wd-select"></select>
+        </label>
+
+        <div class="wd-row">
+          <label class="wd-field">
+            <span class="wd-field-label">Quantity</span>
+            <input id="f-quantity" type="number" min="1" step="1" value="1" class="wd-input" />
+          </label>
+          <label class="wd-field">
+            <span class="wd-field-label">Unit of measure</span>
+            <select id="f-unitOfMeasure" class="wd-select"></select>
+          </label>
+        </div>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Unit cost</span>
+          <input id="f-unitCost" type="number" min="0" step="0.01" class="wd-input" />
+        </label>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Supplier item identifier</span>
+          <input id="f-supplierItemIdentifier" type="text" class="wd-input" />
+        </label>
+
+        <div class="wd-divider"></div>
+
+        <!-- Attachments: required. Pre-filled from the email PDFs; otherwise pick from computer. -->
+        <div class="wd-field">
+          <span class="wd-field-label">Attachments <span class="wd-req">required</span></span>
+          <div id="attachment-list" class="wd-attachments"></div>
+          <div id="attachment-picker" class="wd-attachment-picker" hidden>
+            <input id="f-fileInput" type="file" accept="application/pdf" multiple class="wd-file-input" />
+            <p class="wd-attachment-hint">No attachment found in the email — select one or more PDFs.</p>
+          </div>
+        </div>
+
+        <label class="wd-field">
+          <span class="wd-field-label">Memo <span class="wd-optional">optional</span></span>
+          <textarea id="f-memo" class="wd-input wd-textarea" rows="2"></textarea>
+        </label>
+
+        <button id="submit-requisition-btn" type="submit" class="btn btn-primary" disabled>
+          Submit for approval
+        </button>
+      </form>
+    </section>
+
+    <!-- Result (AI response after success) -->
+    <section id="result" class="wd-shell" hidden>
+      <header class="wd-header">
+        <h1>Bella</h1>
+        <p>Requisition submitted</p>
+      </header>
+      <div class="wd-result-body">
+        <div class="wd-success-badge">✓ Submitted for approval</div>
+        <div id="result-content" class="wd-result-content"></div>
+        <button id="result-done-btn" type="button" class="btn btn-secondary">Back to actions</button>
+      </div>
+    </section>
+
+    <script type="module" src="/src/workday.ts"></script>
+  </body>
+</html>

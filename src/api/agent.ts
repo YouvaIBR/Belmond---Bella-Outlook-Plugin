@@ -1,7 +1,15 @@
 import { acquireToken } from "../auth/msal.js";
-import type { AgentRequest, AgentResponse, BellaRawResponse } from "../types/index.js";
+import type {
+  AgentRequest,
+  AgentResponse,
+  BellaRawResponse,
+  WorkdayDataResponse,
+  WorkdayOptions,
+} from "../types/index.js";
 
 const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL as string;
+const WORKDAY_DATA_URL = import.meta.env.VITE_N8N_WORKDAY_DATA_URL as string;
+const WORKDAY_SUBMIT_URL = import.meta.env.VITE_N8N_WORKDAY_SUBMIT_URL as string;
 
 export class AgentError extends Error {
   constructor(
@@ -57,6 +65,89 @@ export async function callAgent(
   }
 
   return parseBellaResponse(raw);
+}
+
+// Fetches the Workday option lists for the current user. The n8n workflow
+// resolves the user from the Bearer token, so the request carries no body.
+export async function fetchWorkdayData(
+  workdayDataUrl = WORKDAY_DATA_URL,
+): Promise<WorkdayOptions> {
+  const token = await acquireToken();
+
+  const response = await fetch(workdayDataUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new AgentError(response.status, body || response.statusText);
+  }
+
+  const text = await response.text();
+  if (!text) {
+    throw new AgentError(502, "Empty response from Workday data endpoint");
+  }
+
+  let parsed: WorkdayDataResponse;
+  try {
+    parsed = JSON.parse(text) as WorkdayDataResponse;
+  } catch {
+    throw new AgentError(502, `Invalid JSON from Workday data endpoint: ${text.slice(0, 200)}`);
+  }
+
+  if (!parsed.success) {
+    throw new AgentError(502, "Workday data endpoint returned success: false");
+  }
+
+  return parsed.data;
+}
+
+// Submits a requisition as multipart/form-data: the full form context as a
+// single free-text `query` field, the binary documents (max 5) under
+// `attachments`. Content-Type is left unset so the browser sets the multipart
+// boundary. Returns the AI's response (HTML) to display on success.
+export async function submitRequisition(
+  query: string,
+  attachments: File[],
+  submitUrl = WORKDAY_SUBMIT_URL,
+): Promise<string> {
+  const token = await acquireToken();
+
+  const form = new FormData();
+  form.append("query", query);
+  for (const file of attachments) {
+    form.append("attachments", file, file.name);
+  }
+
+  const response = await fetch(submitUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: form,
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new AgentError(response.status, body || response.statusText);
+  }
+
+  const text = await response.text();
+  if (!text) {
+    throw new AgentError(502, "Empty response from webhook");
+  }
+
+  let raw: BellaRawResponse;
+  try {
+    raw = JSON.parse(text) as BellaRawResponse;
+  } catch {
+    throw new AgentError(502, `Invalid JSON from webhook: ${text.slice(0, 200)}`);
+  }
+
+  return raw.mail_template ?? "";
 }
 
 export function parseBellaResponse(raw: BellaRawResponse): AgentResponse {

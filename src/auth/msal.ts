@@ -24,7 +24,12 @@ async function getInstance(): Promise<IPublicClientApplication> {
   return msalInstance;
 }
 
-const SCOPES = ["openid", "profile", "email", `api://youvaibr.github.io/Belmond---Bella-Outlook-Plugin/${CLIENT_ID}/access_as_user`];
+const SCOPES = [
+  "openid",
+  "profile",
+  "email",
+  `api://bel-prd-vision-prj.web.app/${CLIENT_ID}/access_as_user`,
+];
 
 export async function acquireToken(): Promise<string> {
   const msal = await getInstance();

@@ -71,15 +71,15 @@ The add-in is served at `http://localhost:3000`.
 
 ## Available scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start Vite dev server (port 3000) |
-| `npm run build` | Type-check + production build → `dist/` |
-| `npm run test` | Run Vitest unit tests |
-| `npm run test:coverage` | Tests with coverage report |
-| `npm run lint` | Biome linter |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run format` | Prettier formatter |
+| Command                 | Description                             |
+| ----------------------- | --------------------------------------- |
+| `npm run dev`           | Start Vite dev server (port 3000)       |
+| `npm run build`         | Type-check + production build → `dist/` |
+| `npm run test`          | Run Vitest unit tests                   |
+| `npm run test:coverage` | Tests with coverage report              |
+| `npm run lint`          | Biome linter                            |
+| `npm run lint:fix`      | Auto-fix lint issues                    |
+| `npm run format`        | Prettier formatter                      |
 
 ---
 
@@ -105,10 +105,10 @@ src/
 
 ## Documentation
 
-| Guide | Description |
-|-------|-------------|
+| Guide                                  | Description                                                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | [Deployment Guide](docs/deployment.md) | Complete setup: Azure App Registration, GitHub Pages, admin center deployment, sideloading, and troubleshooting |
-| [n8n Workflow Guide](n8n-workflow.md) | n8n webhook configuration, JWT key setup, and testing |
+| [n8n Workflow Guide](n8n-workflow.md)  | n8n webhook configuration, JWT key setup, and testing                                                           |
 
 ---
 
@@ -122,11 +122,11 @@ Deployment is automated via GitHub Actions on every push to `main`.
 2. Make the repository **public**
 3. **Settings → Secrets → Actions** → add three secrets:
 
-| Secret | Value |
-|---|---|
-| `VITE_CLIENT_ID` | Entra ID client ID |
-| `VITE_TENANT_ID` | Entra ID tenant ID |
-| `VITE_N8N_WEBHOOK_URL` | n8n webhook URL |
+| Secret                 | Value              |
+| ---------------------- | ------------------ |
+| `VITE_CLIENT_ID`       | Entra ID client ID |
+| `VITE_TENANT_ID`       | Entra ID tenant ID |
+| `VITE_N8N_WEBHOOK_URL` | n8n webhook URL    |
 
 ### Deploy
 
@@ -135,7 +135,7 @@ git push origin main
 # GitHub Actions: lint → test → build → deploy
 ```
 
-The add-in will be live at `https://youvaibr.github.io/Belmond---Bella-Outlook-Plugin`.
+The add-in will be live at `https://bel-prd-vision-prj.web.app`.
 
 ---
 
@@ -157,9 +157,9 @@ See [Part 5 of the Deployment Guide](docs/deployment.md#part-5--sideload-for-tes
 
 ## Known limitations
 
-| Limitation | Detail |
-|---|---|
-| **Outlook Mobile** | MSAL NAA (`acquireTokenSilent`) fails on mobile — known Microsoft bug. Desktop and OWA work correctly. |
-| **New Outlook + corporate proxy / Okta** | Some tenants experience NAA failures. Test on the target environment early. |
-| **Conditional Access** | The "approved client app" CA grant is deprecated (retiring March 2026). Tenants using it must migrate to the Application Protection Policy grant. |
-| **Key rotation** | Microsoft rotates JWT signing keys every few weeks. Re-run `get_pem_from_kid.sh` and update the n8n credential when this happens. |
+| Limitation                               | Detail                                                                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Outlook Mobile**                       | MSAL NAA (`acquireTokenSilent`) fails on mobile — known Microsoft bug. Desktop and OWA work correctly.                                            |
+| **New Outlook + corporate proxy / Okta** | Some tenants experience NAA failures. Test on the target environment early.                                                                       |
+| **Conditional Access**                   | The "approved client app" CA grant is deprecated (retiring March 2026). Tenants using it must migrate to the Application Protection Policy grant. |
+| **Key rotation**                         | Microsoft rotates JWT signing keys every few weeks. Re-run `get_pem_from_kid.sh` and update the n8n credential when this happens.                 |

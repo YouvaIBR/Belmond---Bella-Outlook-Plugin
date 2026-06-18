@@ -1,6 +1,6 @@
 import { AgentError, callAgent } from "./api/agent.js";
 import { initializeMock } from "./mock/mockOffice.js";
-import { getMailItem, insertDraftReply } from "./services/office.js";
+import { getMailItem, getUserDisplayName, insertDraftReply } from "./services/office.js";
 import { getDraftHtml, renderResult } from "./ui/draft.js";
 import { clearError, showError, showPanel } from "./ui/panels.js";
 
@@ -16,10 +16,20 @@ if (IS_MOCK) {
 
 async function initializeAddin(): Promise<void> {
   attachEventListeners();
+  renderUserName();
   // Auto-trigger: generate immediately when the panel opens.
   // The generate button is hidden by default and shown only on error for retry.
   showPanel("loading");
   await handleGenerate();
+}
+
+function renderUserName(): void {
+  const name = getUserDisplayName();
+  const el = document.getElementById("user-name");
+  if (el && name) {
+    el.textContent = `Signed in as ${name}`;
+    el.hidden = false;
+  }
 }
 
 function attachEventListeners(): void {

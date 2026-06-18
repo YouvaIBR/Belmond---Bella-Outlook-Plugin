@@ -1,0 +1,88 @@
+image: node:20
+
+stages:
+  - install
+  - verify
+  - build
+  - deploy
+
+default:
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull
+
+install:
+  stage: install
+  script:
+    - npm ci
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull-push
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+lint:
+  stage: verify
+  needs: [install]
+  script:
+    - npm run lint
+
+test:
+  stage: verify
+  needs: [install]
+  script:
+    - npm test
+
+build:
+  stage: build
+  needs: [install, lint, test]
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+
+deploy:firebase-hosting:prod:
+  stage: deploy
+  image: node:20
+  needs: [build]
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://iam.googleapis.com/projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab
+  before_script:
+    - apt-get update && apt-get install -y curl python3
+    - curl -sSL https://sdk.cloud.google.com | bash > /dev/null
+    - export PATH=$HOME/google-cloud-sdk/bin:$PATH
+    - npm install -g firebase-tools
+  script:
+    - echo "$GITLAB_OIDC_TOKEN" > /tmp/oidc_token
+    - |
+      cat > /tmp/cred.json <<EOF
+      {
+        "type": "external_account",
+        "audience": "//iam.googleapis.com/projects/835091172967/locations/global/workloadIdentityPools/bel-bapi-shared-pool/providers/bel-bapi-gitlab",
+        "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+        "token_url": "https://sts.googleapis.com/v1/token",
+        "credential_source": {
+          "file": "/tmp/oidc_token",
+          "format": {"type": "text"}
+        },
+        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/bel-prd-bapi-sac-fb-hosting@bel-prd-bapi-prj.iam.gserviceaccount.com:generateAccessToken"
+      }
+      EOF
+    - gcloud auth login --cred-file=/tmp/cred.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
+    - firebase deploy --only hosting --project bel-prd-vision-prj --non-interactive
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
