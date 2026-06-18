@@ -23,3 +23,10 @@ Thumbs.db
 # Editors
 .idea/
 *.sw?
+
+# n8n workflow exports — kept local only (may contain tokens / secrets)
+n8n workflows/
+Bella Outlook Plugin.json
+
+# Scratch / temporary files
+*.txt

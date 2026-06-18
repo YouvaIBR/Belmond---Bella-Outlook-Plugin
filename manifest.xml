@@ -98,6 +98,24 @@
                   </Action>
                 </Control>
 
+                <!-- Workday mode: opens the task pane; no auto-call. Fetches cost
+                     centers, then lets the user pick one and add context before submitting -->
+                <Control xsi:type="Button" id="msgReadWorkdayButton">
+                  <Label resid="WorkdayButton.Label" />
+                  <Supertip>
+                    <Title resid="WorkdayButton.Label" />
+                    <Description resid="WorkdayButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="WorkdayTaskpane.Url" />
+                  </Action>
+                </Control>
+
               </Group>
             </OfficeTab>
           </ExtensionPoint>
@@ -115,15 +133,18 @@
       <bt:Urls>
         <bt:Url id="CommandsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/commands.html" />
         <bt:Url id="Taskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/index.html" />
+        <bt:Url id="WorkdayTaskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/workday.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Bella" />
         <bt:String id="TaskpaneButton.Label" DefaultValue="Reply with Bella" />
         <bt:String id="InjectButton.Label" DefaultValue="Reply with Bella (Quick)" />
+        <bt:String id="WorkdayButton.Label" DefaultValue="Bella for Workday" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Bella panel to generate a reply to this email" />
         <bt:String id="InjectButton.Tooltip" DefaultValue="Generate a reply with Bella and open it as a draft reply" />
+        <bt:String id="WorkdayButton.Tooltip" DefaultValue="Open Bella for Workday: submit a requisition with this email's attachments" />
       </bt:LongStrings>
     </Resources>
 
@@ -182,6 +203,24 @@
                     </Action>
                   </Control>
 
+                  <!-- Workday mode: opens the task pane; no auto-call. Fetches cost
+                       centers, then lets the user pick one and add context before submitting -->
+                  <Control xsi:type="Button" id="msgReadWorkdayButton">
+                    <Label resid="WorkdayButton.Label" />
+                    <Supertip>
+                      <Title resid="WorkdayButton.Label" />
+                      <Description resid="WorkdayButton.Tooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16x16" />
+                      <bt:Image size="32" resid="Icon.32x32" />
+                      <bt:Image size="80" resid="Icon.80x80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <SourceLocation resid="WorkdayTaskpane.Url" />
+                    </Action>
+                  </Control>
+
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
@@ -207,16 +246,19 @@
         <bt:Urls>
           <bt:Url id="CommandsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/commands.html" />
           <bt:Url id="Taskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/index.html" />
+          <bt:Url id="WorkdayTaskpane.Url" DefaultValue="https://bel-prd-vision-prj.web.app/workday.html" />
           <bt:Url id="LaunchEventsFile.Url" DefaultValue="https://bel-prd-vision-prj.web.app/launchEvents.html" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Bella" />
           <bt:String id="TaskpaneButton.Label" DefaultValue="Reply with Bella" />
           <bt:String id="InjectButton.Label" DefaultValue="Reply with Bella (Quick)" />
+          <bt:String id="WorkdayButton.Label" DefaultValue="Bella for Workday" />
         </bt:ShortStrings>
         <bt:LongStrings>
           <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Bella panel to generate a reply to this email" />
           <bt:String id="InjectButton.Tooltip" DefaultValue="Generate a reply with Bella and open it as a draft reply" />
+          <bt:String id="WorkdayButton.Tooltip" DefaultValue="Open Bella for Workday: submit a requisition with this email's attachments" />
         </bt:LongStrings>
       </Resources>
 

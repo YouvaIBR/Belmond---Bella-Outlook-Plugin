@@ -26,6 +26,12 @@ export function getMailItem(): Promise<MailItem> {
   });
 }
 
+// Returns the display name of the signed-in Outlook user (the mailbox owner,
+// not the email sender). Synchronous via userProfile — no network call.
+export function getUserDisplayName(): string {
+  return Office.context?.mailbox?.userProfile?.displayName ?? "";
+}
+
 export function insertDraftReply(html: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof Office === "undefined" || !Office.context?.mailbox) {
