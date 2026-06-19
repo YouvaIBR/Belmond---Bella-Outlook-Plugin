@@ -43,8 +43,8 @@ const SELECT_FIELDS: { id: string; key: keyof WorkdayOptions }[] = [
 let options: WorkdayOptions | null = null;
 // PDF attachments pulled from the email (empty → user must pick from computer).
 let emailAttachments: File[] = [];
-// Prefill runs at most once per form opening.
-let prefillRan = false;
+// Guards against concurrent prefill calls (runs on open + on file add).
+let prefillInFlight = false;
 
 function showPanel(panel: WorkdayPanel): void {
   for (const id of WORKDAY_PANEL_IDS) {
@@ -121,8 +121,8 @@ function attachEventListeners(): void {
   form?.addEventListener("input", () => syncSubmitEnabled());
   form?.addEventListener("change", () => syncSubmitEnabled());
 
-  // When the email has no documents, the user picks files from disk — prefill
-  // fires once they have (only relevant in that no-email-attachment case).
+  // When the email has no documents, the user picks files from disk — re-run the
+  // prefill with those files (it already ran once on email text alone).
   document.getElementById("f-fileInput")?.addEventListener("change", () => {
     if (emailAttachments.length === 0) {
       const picked = getPickedFiles();
@@ -137,7 +137,6 @@ async function openRequisitionForm(): Promise<void> {
   clearError();
   if (!options) return;
 
-  prefillRan = false;
   resetForm();
   populateSelects(options);
 
@@ -151,11 +150,10 @@ async function openRequisitionForm(): Promise<void> {
   syncSubmitEnabled();
   showPanel("workday-form");
 
-  // If the email already has documents, prefill straight away. Otherwise wait
-  // until the user picks files (handled in the file-input change listener).
-  if (emailAttachments.length > 0) {
-    void runPrefill(emailAttachments);
-  }
+  // Always prefill on open: from the email text, plus the email's documents if
+  // any. If the email has no documents, this runs on the email alone; it re-runs
+  // later when the user adds files (file-input change listener).
+  void runPrefill(emailAttachments);
 }
 
 function resetForm(): void {
@@ -163,11 +161,12 @@ function resetForm(): void {
   form.reset();
 }
 
-// Calls the prefill endpoint once and applies the matched fields to the form.
-// Best-effort: any failure leaves the form blank and never blocks the user.
+// Calls the prefill endpoint and applies the matched fields to the form. Runs on
+// open (email text, plus email documents if any) and again when the user adds
+// files. Best-effort: any failure leaves the form as-is and never blocks the user.
 async function runPrefill(attachments: File[]): Promise<void> {
-  if (prefillRan || attachments.length === 0) return;
-  prefillRan = true;
+  if (prefillInFlight) return;
+  prefillInFlight = true;
 
   setPrefilling(true);
   try {
@@ -184,6 +183,7 @@ async function runPrefill(attachments: File[]): Promise<void> {
   } catch {
     // Prefill is optional — ignore errors, the user fills the form manually.
   } finally {
+    prefillInFlight = false;
     setPrefilling(false);
     syncSubmitEnabled();
   }
