@@ -121,18 +121,17 @@ function openMockForm(): void {
   (document.getElementById("attachment-list") as HTMLElement).replaceChildren();
   (document.getElementById("attachment-picker") as HTMLElement).hidden = false;
 
-  // Mock prefill: once the user picks files, simulate Bella reading them.
+  // Mock prefill: re-run each time the user adds files (email has none here).
   const fileInput = document.getElementById("f-fileInput") as HTMLInputElement;
-  fileInput.addEventListener(
-    "change",
-    () => {
-      if ((fileInput.files?.length ?? 0) > 0) void runMockPrefill();
-    },
-    { once: true },
-  );
+  fileInput.addEventListener("change", () => {
+    if ((fileInput.files?.length ?? 0) > 0) void runMockPrefill();
+  });
 
   syncMockSubmit();
   showWorkdayPanel("workday-form");
+
+  // Always prefill on open (email text alone in mock).
+  void runMockPrefill();
 }
 
 async function runMockPrefill(): Promise<void> {
